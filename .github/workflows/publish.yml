@@ -1,0 +1,80 @@
+# Publica o pacote NuGet `Bzapper` ao receber uma tag vX.Y.Z no espelho público
+# bernisoftware/bzapper-dotnet (o scripts/release-sdks.sh do monorepo empurra o conteúdo e a tag).
+#
+# Só publica com a suíte verde — no alvo máximo (net8.0), no mínimo (netstandard2.0) e contra o
+# .nupkg construído — e com a tag igual à <Version> do csproj e a BzapperClient.Version.
+# Autenticação: Trusted Publishing (OIDC) do nuget.org, sem chave guardada — política em
+# nuget.org → (perfil) → Trusted Publishing: owner bernisoftware, repo bzapper-dotnet, workflow
+# publish.yml; variável da org NUGET_USER = nome do perfil. Se o secret NUGET_API_KEY existir
+# (escopo Push para Bzapper*), ele é usado no lugar.
+name: publish
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  nuget:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Trusted Publishing (OIDC)
+    env:
+      DOTNET_NOLOGO: '1'
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      NUGET_API_KEY_SECRET: ${{ secrets.NUGET_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Testes — net8.0 (alvo máximo)
+        run: dotnet test Bzapper.sln -c Release
+
+      - name: Testes — netstandard2.0 (alvo mínimo)
+        run: dotnet test tests/Bzapper.Tests/Bzapper.Tests.csproj -c Release -p:BzapperTargetFramework=netstandard2.0
+
+      - name: Tag == versão do pacote
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          CSPROJ="$(grep -oPm1 '(?<=<Version>)[^<]+' src/Bzapper/Bzapper.csproj)"
+          CONST="$(grep -oP 'public const string Version = "\K[^"]+' src/Bzapper/BzapperClient.Version.cs)"
+          echo "tag=$TAG csproj=$CSPROJ BzapperClient.Version=$CONST"
+          if [ "$TAG" != "$CSPROJ" ] || [ "$TAG" != "$CONST" ]; then
+            echo "::error::A tag v$TAG não bate com <Version>$CSPROJ</Version> / BzapperClient.Version \"$CONST\""
+            exit 1
+          fi
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Pack
+        run: dotnet pack src/Bzapper/Bzapper.csproj -c Release -o artifacts
+
+      - name: Testes contra o pacote construído
+        run: >
+          dotnet test tests/Bzapper.Tests/Bzapper.Tests.csproj -c Release
+          -p:BzapperPackageVersion=${{ steps.version.outputs.version }}
+          -p:RestoreAdditionalProjectSources=${{ github.workspace }}/artifacts
+          -p:RestorePackagesPath=${{ runner.temp }}/nuget-from-artifact
+
+      # Sem o secret: o NuGet/login troca o token OIDC do GitHub por uma chave de 1 h.
+      - name: Login no nuget.org (Trusted Publishing)
+        id: nuget-login
+        if: env.NUGET_API_KEY_SECRET == ''
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Publica no nuget.org
+        env:
+          NUGET_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY || secrets.NUGET_API_KEY }}
+        run: >
+          dotnet nuget push "artifacts/Bzapper.${{ steps.version.outputs.version }}.nupkg"
+          --api-key "$NUGET_KEY"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate

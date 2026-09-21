@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Exemplo rodável (veja o topo de Program.cs): defina BZAPPER_API_KEY e rode "dotnet run" nesta pasta.
+       Fora deste repositório, troque o ProjectReference por:  <PackageReference Include="Bzapper" Version="[0.6.2]" /> -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Bzapper/Bzapper.csproj" />
+  </ItemGroup>
+
+</Project>

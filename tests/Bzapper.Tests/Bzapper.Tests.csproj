@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>Bzapper.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    A mesma suíte roda em três modos (o publish.yml usa os três):
+      dotnet test                                                          SDK compilada para net8.0 (alvo máximo)
+      dotnet test tests/Bzapper.Tests -p:BzapperTargetFramework=netstandard2.0
+                                                                           o build netstandard2.0 da SDK (alvo mínimo)
+      dotnet test tests/Bzapper.Tests -p:BzapperPackageVersion=0.6.2 -p:RestoreAdditionalProjectSources=<pasta do .nupkg>
+                                                                           o PACOTE construído, como o usuário recebe
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BzapperPackageVersion)' == '' And '$(BzapperTargetFramework)' == ''">
+    <ProjectReference Include="../../src/Bzapper/Bzapper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BzapperPackageVersion)' == '' And '$(BzapperTargetFramework)' != ''">
+    <ProjectReference Include="../../src/Bzapper/Bzapper.csproj" SetTargetFramework="TargetFramework=$(BzapperTargetFramework)" />
+    <!-- O que um consumidor netstandard2.0 recebe junto (System.Text.Json e as dependências dele). -->
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BzapperPackageVersion)' != ''">
+    <PackageReference Include="Bzapper" Version="[$(BzapperPackageVersion)]" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Cópia de clients/conformance/cases.json (escrita por clients/conformance/generate.py; o espelho público
+         não tem a pasta conformance/). ConformanceTests.VendoredCasesMatchMonorepo quebra se ficar desatualizada. -->
+    <None Include="fixtures/cases.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
