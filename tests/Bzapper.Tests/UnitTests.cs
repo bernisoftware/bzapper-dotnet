@@ -484,6 +484,67 @@ public class UnitTests
 
     // ── apoio ──────────────────────────────────────────────────────────────────────────────────────────
 
+    // ── compatibilidade com a superfície publicada (tools/api-baseline.json) ───────────────────────────
+
+    [Fact]
+    public void PublishedSurface_IsPreserved()
+    {
+        using var doc = JsonDocument.Parse(File.ReadAllText(Path.Combine(Repo.DotnetRoot, "tools", "api-baseline.json")));
+        var nullability = new NullabilityInfoContext();
+        var problems = new List<string>();
+        foreach (var op in doc.RootElement.GetProperty("ops").EnumerateObject())
+        {
+            var type = op.Value.GetProperty("class").GetString() == "PartnerClient" ? typeof(PartnerClient) : typeof(BzapperClient);
+            var name = char.ToUpperInvariant(op.Name[0]) + op.Name.Substring(1) + "Async";
+            var expected = op.Value.GetProperty("params").EnumerateArray().Select(p => p.GetString()!)
+                .Concat(new[] { "RequestOptions? options", "CancellationToken cancellationToken" }).ToList();
+            var method = type.GetMethods(BindingFlags.Public | BindingFlags.Instance).Where(m => m.Name == name)
+                .FirstOrDefault(m => m.GetParameters().Select(p => $"{CsName(p.ParameterType, nullability.Create(p))} {p.Name}").SequenceEqual(expected));
+            if (method is null)
+            {
+                problems.Add($"{type.Name}.{name}({string.Join(", ", expected)}) sumiu ou mudou");
+                continue;
+            }
+            var ret = CsName(method.ReturnType, nullability.Create(method.ReturnParameter));
+            if (ret != op.Value.GetProperty("returns").GetString())
+                problems.Add($"{type.Name}.{name}: retorno {op.Value.GetProperty("returns").GetString()} → {ret}");
+        }
+        Assert.True(problems.Count == 0, string.Join("\n", problems));
+    }
+
+    private static string CsName(Type t, NullabilityInfo info)
+    {
+        var underlying = Nullable.GetUnderlyingType(t);
+        if (underlying is not null)
+            return CsName(underlying, info) + "?";
+        var name = t switch
+        {
+            _ when t == typeof(string) => "string",
+            _ when t == typeof(bool) => "bool",
+            _ when t == typeof(int) => "int",
+            _ when t == typeof(long) => "long",
+            _ when t == typeof(double) => "double",
+            _ when t.IsGenericType => t.Name.Substring(0, t.Name.IndexOf('`')) + "<" + string.Join(", ",
+                t.GetGenericArguments().Select((a, i) => CsName(a, info.GenericTypeArguments.Length > i ? info.GenericTypeArguments[i] : info))) + ">",
+            _ => t.Name,
+        };
+        return !t.IsValueType && info.ReadState == NullabilityState.Nullable ? name + "?" : name;
+    }
+
+    [Fact]
+    public async Task OpThatGainedSchema_KeepsJsonElementAsync_AndAddsTypedAsync()
+    {
+        using var server = new MockServer { Handler = _ => MockResponse.Ok(new { id = "c-1", status = "paused" }) };
+        using var client = Client(server);
+
+        JsonElement? raw = await client.PauseCampaignAsync("c-1");
+        CampaignStatusChange typed = await client.PauseCampaignTypedAsync("c-1");
+
+        Assert.Equal("paused", raw!.Value.GetProperty("status").GetString());
+        Assert.Equal(JsonSerializer.Serialize(raw), JsonSerializer.Serialize(typed, BzapperJson.Options));
+        Assert.All(server.Requests, r => Assert.Equal("/campaigns/c-1/pause", r.Path));
+    }
+
     private static BzapperClient Client(MockServer server) =>
         new BzapperClient("bz_live_x", new BzapperClientOptions { BaseUrl = server.BaseUrl });
 

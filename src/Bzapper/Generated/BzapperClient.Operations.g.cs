@@ -20,6 +20,7 @@ public sealed partial class BzapperClient
 
     /// <summary>Apply the "About" to ALL connected numbers — <c>POST /brand/apply</c>.</summary>
     /// <remarks>Pushes the `about` (status message) to all of the tenant's connected numbers. Returns how many were applied, the skipped ones (disconnected) and the total.</remarks>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="ApplyBrandTypedAsync"/>, que devolve <see cref="BrandApplyResult"/>.</remarks>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>O JSON devolvido pela API (<c>null</c> quando a resposta vem sem corpo).</returns>
@@ -31,7 +32,22 @@ public sealed partial class BzapperClient
         return Http.SendJsonAsync(HttpMethod.Post, path, null, null, options, cancellationToken);
     }
 
+    /// <summary>Apply the "About" to ALL connected numbers — <c>POST /brand/apply</c>.</summary>
+    /// <remarks>Pushes the `about` (status message) to all of the tenant's connected numbers. Returns how many were applied, the skipped ones (disconnected) and the total.</remarks>
+    /// <remarks>Versão tipada de <see cref="ApplyBrandAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="BrandApplyResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<BrandApplyResult> ApplyBrandTypedAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/brand/apply";
+        return Http.SendAsync<BrandApplyResult>(HttpMethod.Post, path, null, null, options, cancellationToken);
+    }
+
     /// <summary>Generate a tenant API key (raw key shown only once). Admin only — an agent key/user gets 403 admin_required. — <c>POST /keys</c>.</summary>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="CreateMyKeyTypedAsync"/>, que devolve <see cref="ApiKeyCreated"/>.</remarks>
     /// <param name="request">Corpo da requisição (<see cref="CreateMyKeyRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -43,6 +59,21 @@ public sealed partial class BzapperClient
         var path = "/keys";
         if (request is null) throw new ArgumentNullException(nameof(request));
         return Http.SendJsonAsync(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
+    /// <summary>Generate a tenant API key (raw key shown only once). Admin only — an agent key/user gets 403 admin_required. — <c>POST /keys</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="CreateMyKeyAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="CreateMyKeyRequest"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="ApiKeyCreated"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<ApiKeyCreated> CreateMyKeyTypedAsync(CreateMyKeyRequest request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/keys";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<ApiKeyCreated>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
     }
 
     /// <summary>Create a project (admin) — <c>POST /projects</c>.</summary>
@@ -60,7 +91,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Delete a project (admin) — <c>DELETE /projects/{id}</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Resource ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Project ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>Nada (a API responde sem corpo).</returns>
@@ -98,7 +129,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Identity of the numbers of a specific project — <c>GET /projects/{id}/brand</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Resource ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Project ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>O objeto <see cref="BrandProfile"/> devolvido pela API.</returns>
@@ -138,6 +169,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>List the tenant's API keys (without the raw key) — <c>GET /keys</c>.</summary>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="ListMyKeysTypedAsync"/>, que devolve <see cref="ApiKeyList"/>.</remarks>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>O JSON devolvido pela API (<c>null</c> quando a resposta vem sem corpo).</returns>
@@ -147,6 +179,19 @@ public sealed partial class BzapperClient
     {
         var path = "/keys";
         return Http.SendJsonAsync(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>List the tenant's API keys (without the raw key) — <c>GET /keys</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="ListMyKeysAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="ApiKeyList"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<ApiKeyList> ListMyKeysTypedAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/keys";
+        return Http.SendAsync<ApiKeyList>(HttpMethod.Get, path, null, null, options, cancellationToken);
     }
 
     /// <summary>List the account's projects — <c>GET /projects</c>.</summary>
@@ -176,7 +221,7 @@ public sealed partial class BzapperClient
 
     /// <summary>Remove a user from the account (admin) — <c>DELETE /users/{id}</c>.</summary>
     /// <remarks>You cannot remove yourself (409 self_remove) nor the last administrator (409 last_admin).</remarks>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Resource ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Account user ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>Nada (a API responde sem corpo).</returns>
@@ -189,7 +234,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Revoke a tenant API key. Admin only. — <c>DELETE /keys/{id}</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. API key ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>Nada (a API responde sem corpo).</returns>
@@ -216,7 +261,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Save the identity of a specific project's numbers (admin) — <c>PUT /projects/{id}/brand</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Resource ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Project ID (UUID).</param>
     /// <param name="request">Corpo da requisição (<see cref="BrandProfile"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -245,6 +290,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Update the user profile (name/phone/job title) — <c>PATCH /me</c>.</summary>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="UpdateProfileTypedAsync"/>, que devolve <see cref="ProfileUpdated"/>.</remarks>
     /// <param name="request">Corpo da requisição (<see cref="UpdateProfileRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -258,9 +304,24 @@ public sealed partial class BzapperClient
         return Http.SendJsonAsync(BzapperHttp.Patch, path, null, RequestBody.Json(request), options, cancellationToken);
     }
 
+    /// <summary>Update the user profile (name/phone/job title) — <c>PATCH /me</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="UpdateProfileAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="UpdateProfileRequest"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="ProfileUpdated"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<ProfileUpdated> UpdateProfileTypedAsync(UpdateProfileRequest request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/me";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<ProfileUpdated>(BzapperHttp.Patch, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
     /// <summary>Update a project (admin) — <c>PATCH /projects/{id}</c>.</summary>
     /// <remarks>`api_mode` is immutable and is ignored here.</remarks>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Resource ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Project ID (UUID).</param>
     /// <param name="request">Corpo da requisição (<see cref="UpdateProjectRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -276,7 +337,7 @@ public sealed partial class BzapperClient
 
     /// <summary>Change a user's role (admin) — <c>PATCH /users/{id}</c>.</summary>
     /// <remarks>Demoting the last administrator of the account is refused (409 last_admin).</remarks>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Resource ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Account user ID (UUID).</param>
     /// <param name="request">Corpo da requisição (<see cref="UpdateUserRoleRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -291,6 +352,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Upload the brand logo (multipart) → DO Spaces — <c>POST /brand/logo</c>.</summary>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="UploadBrandLogoTypedAsync"/>, que devolve <see cref="BrandLogoUploaded"/>.</remarks>
     /// <param name="file">Arquivo enviado como <c>multipart/form-data</c> (campo <c>file</c>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -304,8 +366,23 @@ public sealed partial class BzapperClient
         return Http.SendJsonAsync(HttpMethod.Post, path, null, RequestBody.Multipart(file), options, cancellationToken);
     }
 
+    /// <summary>Upload the brand logo (multipart) → DO Spaces — <c>POST /brand/logo</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="UploadBrandLogoAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="file">Arquivo enviado como <c>multipart/form-data</c> (campo <c>file</c>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="BrandLogoUploaded"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<BrandLogoUploaded> UploadBrandLogoTypedAsync(FileUpload file, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/brand/logo";
+        if (file is null) throw new ArgumentNullException(nameof(file));
+        return Http.SendAsync<BrandLogoUploaded>(HttpMethod.Post, path, null, RequestBody.Multipart(file), options, cancellationToken);
+    }
+
     /// <summary>Upload the project logo (multipart, PNG/JPEG/WebP up to 5 MB) — admin — <c>POST /projects/{id}/logo</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Resource ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Project ID (UUID).</param>
     /// <param name="file">Arquivo enviado como <c>multipart/form-data</c> (campo <c>file</c>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -322,7 +399,7 @@ public sealed partial class BzapperClient
     // ── advanced ────────────────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>Apply/remove a label on a chat (experimental) — <c>POST /chats/{jid}/labels</c>.</summary>
-    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Group JID (…@g.us).</param>
+    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Chat JID — contact (…@s.whatsapp.net / …@lid) or group (…@g.us).</param>
     /// <param name="request">Corpo da requisição (<see cref="ApplyChatLabelRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -337,7 +414,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Archive/unarchive a chat — <c>POST /chats/{jid}/archive</c>.</summary>
-    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Group JID (…@g.us).</param>
+    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Chat JID — contact (…@s.whatsapp.net / …@lid) or group (…@g.us).</param>
     /// <param name="request">Corpo da requisição (<see cref="ChatAction"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -352,7 +429,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Block a contact — <c>POST /contacts/{jid}/block</c>.</summary>
-    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Group JID (…@g.us).</param>
+    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Contact JID (…@s.whatsapp.net) to block/unblock.</param>
     /// <param name="request">Corpo da requisição (<see cref="InstanceBody"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -397,7 +474,8 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Edit the text of a sent message — <c>PATCH /messages/{id}</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Instance ID (UUID).</param>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="EditMessageTypedAsync"/>, que devolve <see cref="WAMessageRef"/>.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. bZapper message ID (UUID) — the `id` returned when the message was queued.</param>
     /// <param name="request">Corpo da requisição (<see cref="EditMessageRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -411,7 +489,24 @@ public sealed partial class BzapperClient
         return Http.SendJsonAsync(BzapperHttp.Patch, path, null, RequestBody.Json(request), options, cancellationToken);
     }
 
+    /// <summary>Edit the text of a sent message — <c>PATCH /messages/{id}</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="EditMessageAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. bZapper message ID (UUID) — the `id` returned when the message was queued.</param>
+    /// <param name="request">Corpo da requisição (<see cref="EditMessageRequest"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="WAMessageRef"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<WAMessageRef> EditMessageTypedAsync(string id, EditMessageRequest request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/messages/" + PathSegment.Encode(id, "id");
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<WAMessageRef>(BzapperHttp.Patch, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
     /// <summary>Forward a message (experimental) — <c>POST /messages/forward</c>.</summary>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="ForwardMessageTypedAsync"/>, que devolve <see cref="WAMessageRef"/>.</remarks>
     /// <param name="request">Corpo da requisição (<see cref="ForwardMessageRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -425,7 +520,23 @@ public sealed partial class BzapperClient
         return Http.SendJsonAsync(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
     }
 
+    /// <summary>Forward a message (experimental) — <c>POST /messages/forward</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="ForwardMessageAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="ForwardMessageRequest"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="WAMessageRef"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<WAMessageRef> ForwardMessageTypedAsync(ForwardMessageRequest request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/messages/forward";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<WAMessageRef>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
     /// <summary>List blocked contacts — <c>GET /blocklist</c>.</summary>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="GetBlocklistTypedAsync"/>, que devolve <see cref="Blocklist"/>.</remarks>
     /// <param name="instanceId"><c>instance_id</c> (query). Obrigatório. Instance ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -438,6 +549,22 @@ public sealed partial class BzapperClient
         if (instanceId is null) throw new ArgumentNullException(nameof(instanceId));
         var query = new Query().Add("instance_id", instanceId);
         return Http.SendJsonAsync(HttpMethod.Get, path, query, null, options, cancellationToken);
+    }
+
+    /// <summary>List blocked contacts — <c>GET /blocklist</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="GetBlocklistAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="instanceId"><c>instance_id</c> (query). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="Blocklist"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<Blocklist> GetBlocklistTypedAsync(string instanceId, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/blocklist";
+        if (instanceId is null) throw new ArgumentNullException(nameof(instanceId));
+        var query = new Query().Add("instance_id", instanceId);
+        return Http.SendAsync<Blocklist>(HttpMethod.Get, path, query, null, options, cancellationToken);
     }
 
     /// <summary>List the number's labels (experimental) — <c>GET /labels</c>.</summary>
@@ -456,7 +583,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Mark a chat read/unread — <c>POST /chats/{jid}/read</c>.</summary>
-    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Group JID (…@g.us).</param>
+    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Chat JID — contact (…@s.whatsapp.net / …@lid) or group (…@g.us).</param>
     /// <param name="request">Corpo da requisição (<see cref="ChatAction"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -471,7 +598,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Mute/unmute a chat — <c>POST /chats/{jid}/mute</c>.</summary>
-    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Group JID (…@g.us).</param>
+    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Chat JID — contact (…@s.whatsapp.net / …@lid) or group (…@g.us).</param>
     /// <param name="request">Corpo da requisição (<see cref="ChatAction"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -486,6 +613,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Start a call (experimental) — <c>POST /calls/offer</c>.</summary>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="OfferCallTypedAsync"/>, que devolve <see cref="CallOffered"/>.</remarks>
     /// <param name="request">Corpo da requisição (<see cref="OfferCallRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -499,8 +627,23 @@ public sealed partial class BzapperClient
         return Http.SendJsonAsync(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
     }
 
+    /// <summary>Start a call (experimental) — <c>POST /calls/offer</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="OfferCallAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="OfferCallRequest"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="CallOffered"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<CallOffered> OfferCallTypedAsync(OfferCallRequest request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/calls/offer";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<CallOffered>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
     /// <summary>Pin/unpin a chat — <c>POST /chats/{jid}/pin</c>.</summary>
-    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Group JID (…@g.us).</param>
+    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Chat JID — contact (…@s.whatsapp.net / …@lid) or group (…@g.us).</param>
     /// <param name="request">Corpo da requisição (<see cref="ChatAction"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -529,7 +672,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Revoke a message (delete for everyone) — <c>DELETE /messages/{id}</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. bZapper message ID (UUID) — the `id` returned when the message was queued.</param>
     /// <param name="forEveryone"><c>for_everyone</c> (query).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -574,7 +717,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Unblock a contact — <c>POST /contacts/{jid}/unblock</c>.</summary>
-    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Group JID (…@g.us).</param>
+    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Contact JID (…@s.whatsapp.net) to block/unblock.</param>
     /// <param name="request">Corpo da requisição (<see cref="InstanceBody"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -605,7 +748,7 @@ public sealed partial class BzapperClient
 
     /// <summary>Dismiss an advisory — <c>POST /advisories/{id}/read</c>.</summary>
     /// <remarks>Marks the advisory as handled; it stops being returned by `GET /advisories`.</remarks>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Advisory ID.</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>Nada (a API responde sem corpo).</returns>
@@ -789,7 +932,7 @@ public sealed partial class BzapperClient
     // ── campaigns ───────────────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>Add (or replace) recipients — <c>POST /campaigns/{id}/recipients</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
     /// <param name="request">Corpo da requisição (<see cref="CampaignRecipients"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -804,7 +947,8 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Cancel a campaign — <c>POST /campaigns/{id}/cancel</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="CancelCampaignTypedAsync"/>, que devolve <see cref="CampaignStatusChange"/>.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>O JSON devolvido pela API (<c>null</c> quando a resposta vem sem corpo).</returns>
@@ -814,6 +958,20 @@ public sealed partial class BzapperClient
     {
         var path = "/campaigns/" + PathSegment.Encode(id, "id") + "/cancel";
         return Http.SendJsonAsync(HttpMethod.Post, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Cancel a campaign — <c>POST /campaigns/{id}/cancel</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="CancelCampaignAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="CampaignStatusChange"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<CampaignStatusChange> CancelCampaignTypedAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/campaigns/" + PathSegment.Encode(id, "id") + "/cancel";
+        return Http.SendAsync<CampaignStatusChange>(HttpMethod.Post, path, null, null, options, cancellationToken);
     }
 
     /// <summary>Create a campaign — <c>POST /campaigns</c>.</summary>
@@ -832,7 +990,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Simulate a campaign without sending — <c>POST /campaigns/{id}/dry-run</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>O objeto <see cref="CampaignDryRun"/> devolvido pela API.</returns>
@@ -862,7 +1020,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Get a campaign with stats and variations — <c>GET /campaigns/{id}</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>O objeto <see cref="GetCampaignResult"/> devolvido pela API.</returns>
@@ -890,7 +1048,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>List recipients with per-contact delivery — <c>GET /campaigns/{id}/recipients</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
     /// <param name="limit"><c>limit</c> (query).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -919,7 +1077,8 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Pause a campaign — <c>POST /campaigns/{id}/pause</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="PauseCampaignTypedAsync"/>, que devolve <see cref="CampaignStatusChange"/>.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>O JSON devolvido pela API (<c>null</c> quando a resposta vem sem corpo).</returns>
@@ -931,8 +1090,23 @@ public sealed partial class BzapperClient
         return Http.SendJsonAsync(HttpMethod.Post, path, null, null, options, cancellationToken);
     }
 
+    /// <summary>Pause a campaign — <c>POST /campaigns/{id}/pause</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="PauseCampaignAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="CampaignStatusChange"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<CampaignStatusChange> PauseCampaignTypedAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/campaigns/" + PathSegment.Encode(id, "id") + "/pause";
+        return Http.SendAsync<CampaignStatusChange>(HttpMethod.Post, path, null, null, options, cancellationToken);
+    }
+
     /// <summary>Resume a campaign — <c>POST /campaigns/{id}/resume</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="ResumeCampaignTypedAsync"/>, que devolve <see cref="CampaignStatusChange"/>.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>O JSON devolvido pela API (<c>null</c> quando a resposta vem sem corpo).</returns>
@@ -944,8 +1118,22 @@ public sealed partial class BzapperClient
         return Http.SendJsonAsync(HttpMethod.Post, path, null, null, options, cancellationToken);
     }
 
+    /// <summary>Resume a campaign — <c>POST /campaigns/{id}/resume</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="ResumeCampaignAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="CampaignStatusChange"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<CampaignStatusChange> ResumeCampaignTypedAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/campaigns/" + PathSegment.Encode(id, "id") + "/resume";
+        return Http.SendAsync<CampaignStatusChange>(HttpMethod.Post, path, null, null, options, cancellationToken);
+    }
+
     /// <summary>Start (or schedule) a campaign — <c>POST /campaigns/{id}/start</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>O objeto <see cref="StartCampaignResult"/> devolvido pela API.</returns>
@@ -959,7 +1147,7 @@ public sealed partial class BzapperClient
 
     /// <summary>Edit a not-yet-started campaign — <c>PATCH /campaigns/{id}</c>.</summary>
     /// <remarks>Updates name, pacing, schedule and (if sent) replaces the variations. Only allowed while draft/scheduled — 409 once started.</remarks>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
     /// <param name="request">Corpo da requisição (<see cref="CampaignUpdate"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -1003,7 +1191,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Disconnect a partner app (admin). The partner's key stops working immediately. — <c>DELETE /me/connections/{id}</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Connected partner app (connection) ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>Nada (a API responde sem corpo).</returns>
@@ -1119,7 +1307,7 @@ public sealed partial class BzapperClient
 
     /// <summary>Delete a contact group — <c>DELETE /contact-groups/{id}</c>.</summary>
     /// <remarks>Removes the contact group from the dictionary and unlinks it from every contact.</remarks>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Contact ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Contact group ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>Nada (a API responde sem corpo).</returns>
@@ -1149,7 +1337,7 @@ public sealed partial class BzapperClient
 
     /// <summary>Delete a tag — <c>DELETE /tags/{id}</c>.</summary>
     /// <remarks>Removes the tag from the dictionary and unlinks it from every contact.</remarks>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Contact ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Tag ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>Nada (a API responde sem corpo).</returns>
@@ -1423,6 +1611,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Invite link (optional reset) — <c>GET /groups/{jid}/invite</c>.</summary>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="GroupInviteLinkTypedAsync"/>, que devolve <see cref="GroupInviteLink"/>.</remarks>
     /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Group JID (…@g.us).</param>
     /// <param name="instanceId"><c>instance_id</c> (query). Obrigatório. Instance ID (UUID).</param>
     /// <param name="reset"><c>reset</c> (query).</param>
@@ -1439,7 +1628,26 @@ public sealed partial class BzapperClient
         return Http.SendJsonAsync(HttpMethod.Get, path, query, null, options, cancellationToken);
     }
 
+    /// <summary>Invite link (optional reset) — <c>GET /groups/{jid}/invite</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="GroupInviteLinkAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Group JID (…@g.us).</param>
+    /// <param name="instanceId"><c>instance_id</c> (query). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="reset"><c>reset</c> (query).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="GroupInviteLink"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<GroupInviteLink> GroupInviteLinkTypedAsync(string jid, string instanceId, bool? reset = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/groups/" + PathSegment.Encode(jid, "jid") + "/invite";
+        if (instanceId is null) throw new ArgumentNullException(nameof(instanceId));
+        var query = new Query().Add("instance_id", instanceId).Add("reset", reset);
+        return Http.SendAsync<GroupInviteLink>(HttpMethod.Get, path, query, null, options, cancellationToken);
+    }
+
     /// <summary>Join a group via invite link — <c>POST /groups/join</c>.</summary>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="JoinGroupTypedAsync"/>, que devolve <see cref="GroupJoined"/>.</remarks>
     /// <param name="request">Corpo da requisição (<see cref="JoinGroupRequest"/>).</param>
     /// <param name="instanceId"><c>instance_id</c> (query). Obrigatório. Instance ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
@@ -1454,6 +1662,24 @@ public sealed partial class BzapperClient
         if (instanceId is null) throw new ArgumentNullException(nameof(instanceId));
         var query = new Query().Add("instance_id", instanceId);
         return Http.SendJsonAsync(HttpMethod.Post, path, query, RequestBody.Json(request), options, cancellationToken);
+    }
+
+    /// <summary>Join a group via invite link — <c>POST /groups/join</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="JoinGroupAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="JoinGroupRequest"/>).</param>
+    /// <param name="instanceId"><c>instance_id</c> (query). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="GroupJoined"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<GroupJoined> JoinGroupTypedAsync(JoinGroupRequest request, string instanceId, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/groups/join";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        if (instanceId is null) throw new ArgumentNullException(nameof(instanceId));
+        var query = new Query().Add("instance_id", instanceId);
+        return Http.SendAsync<GroupJoined>(HttpMethod.Post, path, query, RequestBody.Json(request), options, cancellationToken);
     }
 
     /// <summary>Leave the group — <c>POST /groups/{jid}/leave</c>.</summary>
@@ -1488,6 +1714,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>List pending join requests — <c>GET /groups/{jid}/join-requests</c>.</summary>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="ListJoinRequestsTypedAsync"/>, que devolve <see cref="JoinRequestList"/>.</remarks>
     /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Group JID (…@g.us).</param>
     /// <param name="instanceId"><c>instance_id</c> (query). Obrigatório. Instance ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
@@ -1501,6 +1728,23 @@ public sealed partial class BzapperClient
         if (instanceId is null) throw new ArgumentNullException(nameof(instanceId));
         var query = new Query().Add("instance_id", instanceId);
         return Http.SendJsonAsync(HttpMethod.Get, path, query, null, options, cancellationToken);
+    }
+
+    /// <summary>List pending join requests — <c>GET /groups/{jid}/join-requests</c>.</summary>
+    /// <remarks>Versão tipada de <see cref="ListJoinRequestsAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="jid"><c>jid</c> (caminho). Obrigatório. Group JID (…@g.us).</param>
+    /// <param name="instanceId"><c>instance_id</c> (query). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="JoinRequestList"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<JoinRequestList> ListJoinRequestsTypedAsync(string jid, string instanceId, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/groups/" + PathSegment.Encode(jid, "jid") + "/join-requests";
+        if (instanceId is null) throw new ArgumentNullException(nameof(instanceId));
+        var query = new Query().Add("instance_id", instanceId);
+        return Http.SendAsync<JoinRequestList>(HttpMethod.Get, path, query, null, options, cancellationToken);
     }
 
     /// <summary>Preview a group from an invite link without joining — <c>POST /groups/join/preview</c>.</summary>
@@ -2001,7 +2245,7 @@ public sealed partial class BzapperClient
     // ── pools ───────────────────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>Add a number to the pool — <c>POST /pools/{id}/numbers</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Pool ID (UUID).</param>
     /// <param name="request">Corpo da requisição (<see cref="AddPoolNumberRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -2030,7 +2274,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Get a pool (with members) — <c>GET /pools/{id}</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Pool ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>O objeto <see cref="Pool"/> devolvido pela API.</returns>
@@ -2057,7 +2301,7 @@ public sealed partial class BzapperClient
     // ── scheduling ──────────────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>Cancel a pending scheduled send — <c>DELETE /messages/scheduled/{id}</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Scheduled message ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>Nada (a API responde sem corpo).</returns>
@@ -2102,6 +2346,7 @@ public sealed partial class BzapperClient
 
     /// <summary>AGGREGATE account usage + per project (admin) — <c>GET /account/usage</c>.</summary>
     /// <remarks>Billing basis — sums all projects and breaks it down per project.</remarks>
+    /// <remarks>Devolve o JSON cru por compatibilidade com versões anteriores; prefira <see cref="GetAccountUsageTypedAsync"/>, que devolve <see cref="AccountUsage"/>.</remarks>
     /// <param name="from"><c>from</c> (query).</param>
     /// <param name="to"><c>to</c> (query).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
@@ -2114,6 +2359,23 @@ public sealed partial class BzapperClient
         var path = "/account/usage";
         var query = new Query().Add("from", from).Add("to", to);
         return Http.SendJsonAsync(HttpMethod.Get, path, query, null, options, cancellationToken);
+    }
+
+    /// <summary>AGGREGATE account usage + per project (admin) — <c>GET /account/usage</c>.</summary>
+    /// <remarks>Billing basis — sums all projects and breaks it down per project.</remarks>
+    /// <remarks>Versão tipada de <see cref="GetAccountUsageAsync"/> (que segue devolvendo <c>JsonElement?</c> por compatibilidade).</remarks>
+    /// <param name="from"><c>from</c> (query).</param>
+    /// <param name="to"><c>to</c> (query).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="AccountUsage"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<AccountUsage> GetAccountUsageTypedAsync(DateTimeOffset? from = null, DateTimeOffset? to = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/account/usage";
+        var query = new Query().Add("from", from).Add("to", to);
+        return Http.SendAsync<AccountUsage>(HttpMethod.Get, path, query, null, options, cancellationToken);
     }
 
     /// <summary>Tenant usage summary (by period/type/number) — <c>GET /usage</c>.</summary>
@@ -2148,7 +2410,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Remove a webhook — <c>DELETE /webhooks/{id}</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Webhook ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>Nada (a API responde sem corpo).</returns>
@@ -2161,7 +2423,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Latest deliveries of a webhook — <c>GET /webhooks/{id}/deliveries</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Resource ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Webhook ID (UUID).</param>
     /// <param name="limit"><c>limit</c> (query). 1–200 (default 50).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -2188,7 +2450,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Send a signed sample event to this webhook and report the result — <c>POST /webhooks/{id}/test</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Resource ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Webhook ID (UUID).</param>
     /// <param name="request">Corpo da requisição (<see cref="TestWebhookRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -2218,7 +2480,7 @@ public sealed partial class BzapperClient
 
     /// <summary>Update a webhook (send `secret: "regenerate"` to rotate the secret) — <c>PATCH /webhooks/{id}</c>.</summary>
     /// <remarks>Replaces url, event types, number filter and active flag. `url` is required. `active` omitted = true. With `secret: "regenerate"` a new secret is generated and returned ONCE in the response; any other non-empty `secret` replaces it.</remarks>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Resource ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Webhook ID (UUID).</param>
     /// <param name="request">Corpo da requisição (<see cref="UpdateWebhookRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>

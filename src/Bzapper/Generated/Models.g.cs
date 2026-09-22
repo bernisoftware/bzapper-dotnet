@@ -12,6 +12,20 @@ using Bzapper.Internal;
 
 namespace Bzapper;
 
+/// <summary><c>AccountUsage</c> (veja a referência da API).</summary>
+public class AccountUsage : BzapperObject
+{
+    /// <summary><c>account</c> — Obrigatório.</summary>
+    [JsonPropertyName("account")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public UsageSummary? Account { get; set; }
+
+    /// <summary><c>projects</c> — Obrigatório.</summary>
+    [JsonPropertyName("projects")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<ProjectUsage>? Projects { get; set; }
+}
+
 /// <summary>Account user. role admin (everything) or agent (member — no billing).</summary>
 public class AccountUser : BzapperObject
 {
@@ -178,6 +192,86 @@ public class AdvisoryList : BzapperObject
     public List<Advisory>? Advisories { get; set; }
 }
 
+/// <summary><c>ApiKey</c> (veja a referência da API).</summary>
+public class ApiKey : BzapperObject
+{
+    /// <summary><c>id</c> — Obrigatório.</summary>
+    [JsonPropertyName("id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Id { get; set; }
+
+    /// <summary><c>tenant_id</c> — Obrigatório.</summary>
+    [JsonPropertyName("tenant_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? TenantId { get; set; }
+
+    /// <summary><c>name</c></summary>
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; set; }
+
+    /// <summary><c>role</c> — Role of the key/user (super_admin is via the admin token). Obrigatório.</summary>
+    [JsonPropertyName("role")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Role { get; set; }
+
+    /// <summary><c>scopes</c></summary>
+    [JsonPropertyName("scopes")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Scopes { get; set; }
+
+    /// <summary><c>created_at</c></summary>
+    [JsonPropertyName("created_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? CreatedAt { get; set; }
+
+    /// <summary><c>last_used_at</c></summary>
+    [JsonPropertyName("last_used_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? LastUsedAt { get; set; }
+
+    /// <summary><c>revoked_at</c></summary>
+    [JsonPropertyName("revoked_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? RevokedAt { get; set; }
+
+    /// <summary><c>project_id</c> — Project the key belongs to.</summary>
+    [JsonPropertyName("project_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ProjectId { get; set; }
+
+    /// <summary><c>partner_connection_id</c> — Set when the key was issued to a partner via bZapper Connect.</summary>
+    [JsonPropertyName("partner_connection_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? PartnerConnectionId { get; set; }
+}
+
+/// <summary><c>ApiKeyCreated</c> (veja a referência da API).</summary>
+public class ApiKeyCreated : BzapperObject
+{
+    /// <summary><c>api_key</c> — RAW key — shown only once, never recoverable. Obrigatório.</summary>
+    [JsonPropertyName("api_key")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ApiKey { get; set; }
+
+    /// <summary><c>key</c> — Obrigatório.</summary>
+    [JsonPropertyName("key")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ApiKey? Key { get; set; }
+}
+
+/// <summary><c>ApiKeyList</c> (veja a referência da API).</summary>
+public class ApiKeyList : BzapperObject
+{
+    /// <summary><c>data</c> — Obrigatório.</summary>
+    [JsonPropertyName("data")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<ApiKey>? Data { get; set; }
+}
+
 /// <summary><c>ApplyChatLabelRequest</c> (veja a referência da API).</summary>
 public class ApplyChatLabelRequest : BzapperObject
 {
@@ -195,6 +289,43 @@ public class ApplyChatLabelRequest : BzapperObject
     [JsonPropertyName("apply")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? Apply { get; set; }
+}
+
+/// <summary><c>Blocklist</c> (veja a referência da API).</summary>
+public class Blocklist : BzapperObject
+{
+    /// <summary><c>data</c> — Blocked JIDs. Obrigatório.</summary>
+    [JsonPropertyName("data")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Data { get; set; }
+}
+
+/// <summary><c>BrandApplyResult</c> (veja a referência da API).</summary>
+public class BrandApplyResult : BzapperObject
+{
+    /// <summary><c>applied</c> — Numbers whose "About" was updated. Obrigatório.</summary>
+    [JsonPropertyName("applied")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Applied { get; set; }
+
+    /// <summary><c>skipped</c> — Phones of the numbers that could not be updated (offline/unsupported). Obrigatório.</summary>
+    [JsonPropertyName("skipped")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Skipped { get; set; }
+
+    /// <summary><c>total</c> — Numbers in the project. Obrigatório.</summary>
+    [JsonPropertyName("total")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Total { get; set; }
+}
+
+/// <summary><c>BrandLogoUploaded</c> (veja a referência da API).</summary>
+public class BrandLogoUploaded : BzapperObject
+{
+    /// <summary><c>logo_url</c> — Public URL of the logo (cache-busted with `?v=`). Obrigatório.</summary>
+    [JsonPropertyName("logo_url")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? LogoUrl { get; set; }
 }
 
 /// <summary>Shared identity of the numbers. `about` is the ONLY field applicable to the WhatsApp profile (via /brand/apply); the rest form the brand kit (reference/contact cards). The profile name and photo are set by the customer on their phone when pairing the number.</summary>
@@ -253,6 +384,15 @@ public class Button : BzapperObject
     [JsonPropertyName("title")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Title { get; set; }
+}
+
+/// <summary><c>CallOffered</c> (veja a referência da API).</summary>
+public class CallOffered : BzapperObject
+{
+    /// <summary><c>call_id</c> — Obrigatório.</summary>
+    [JsonPropertyName("call_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? CallId { get; set; }
 }
 
 /// <summary><c>Campaign</c> (veja a referência da API).</summary>
@@ -584,6 +724,20 @@ public class CampaignStats : BzapperObject
     [JsonPropertyName("suppressed")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? Suppressed { get; set; }
+}
+
+/// <summary><c>CampaignStatusChange</c> (veja a referência da API).</summary>
+public class CampaignStatusChange : BzapperObject
+{
+    /// <summary><c>id</c> — Obrigatório.</summary>
+    [JsonPropertyName("id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Id { get; set; }
+
+    /// <summary><c>status</c> — Obrigatório.</summary>
+    [JsonPropertyName("status")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Status { get; set; }
 }
 
 /// <summary>All fields optional; omitted name/pacing keep the current value. The pool cannot be changed.</summary>
@@ -1750,6 +1904,24 @@ public class Group : BzapperObject
     public List<GroupParticipant>? Participants { get; set; }
 }
 
+/// <summary><c>GroupInviteLink</c> (veja a referência da API).</summary>
+public class GroupInviteLink : BzapperObject
+{
+    /// <summary><c>invite_link</c> — Obrigatório.</summary>
+    [JsonPropertyName("invite_link")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? InviteLink { get; set; }
+}
+
+/// <summary><c>GroupJoined</c> (veja a referência da API).</summary>
+public class GroupJoined : BzapperObject
+{
+    /// <summary><c>jid</c> — JID of the joined group (…@g.us). Obrigatório.</summary>
+    [JsonPropertyName("jid")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Jid { get; set; }
+}
+
 /// <summary><c>GroupList</c> (veja a referência da API).</summary>
 public class GroupList : BzapperObject
 {
@@ -2150,6 +2322,24 @@ public class JoinGroupRequest : BzapperObject
     [JsonPropertyName("code")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Code { get; set; }
+}
+
+/// <summary><c>JoinRequest</c> (veja a referência da API).</summary>
+public class JoinRequest : BzapperObject
+{
+    /// <summary><c>jid</c> — JID of the requester. Obrigatório.</summary>
+    [JsonPropertyName("jid")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Jid { get; set; }
+}
+
+/// <summary><c>JoinRequestList</c> (veja a referência da API).</summary>
+public class JoinRequestList : BzapperObject
+{
+    /// <summary><c>data</c> — Obrigatório.</summary>
+    [JsonPropertyName("data")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<JoinRequest>? Data { get; set; }
 }
 
 /// <summary><c>Label</c> (veja a referência da API).</summary>
@@ -2937,6 +3127,15 @@ public class PricingPlansValue : BzapperObject
     public bool? UnlimitedMessages { get; set; }
 }
 
+/// <summary><c>ProfileUpdated</c> (veja a referência da API).</summary>
+public class ProfileUpdated : BzapperObject
+{
+    /// <summary><c>user</c> — Obrigatório.</summary>
+    [JsonPropertyName("user")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public User? User { get; set; }
+}
+
 /// <summary>Isolated environment (numbers, inbox, keys, stats) within the account.</summary>
 public class Project : BzapperObject
 {
@@ -2992,6 +3191,40 @@ public class Project : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [JsonConverter(typeof(UtcDateTimeConverter))]
     public DateTimeOffset? ArchivedAt { get; set; }
+}
+
+/// <summary><c>ProjectUsage</c> (veja a referência da API).</summary>
+public class ProjectUsage : BzapperObject
+{
+    /// <summary><c>project_id</c></summary>
+    [JsonPropertyName("project_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ProjectId { get; set; }
+
+    /// <summary><c>name</c></summary>
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; set; }
+
+    /// <summary><c>numbers</c></summary>
+    [JsonPropertyName("numbers")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Numbers { get; set; }
+
+    /// <summary><c>total</c></summary>
+    [JsonPropertyName("total")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Total { get; set; }
+
+    /// <summary><c>sent</c></summary>
+    [JsonPropertyName("sent")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Sent { get; set; }
+
+    /// <summary><c>received</c></summary>
+    [JsonPropertyName("received")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Received { get; set; }
 }
 
 /// <summary><c>RejectCallRequest</c> (veja a referência da API).</summary>
@@ -3826,6 +4059,88 @@ public class UsageSummarySeriesItem : BzapperObject
     [JsonPropertyName("received")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? Received { get; set; }
+}
+
+/// <summary><c>User</c> (veja a referência da API).</summary>
+public class User : BzapperObject
+{
+    /// <summary><c>id</c> — Obrigatório.</summary>
+    [JsonPropertyName("id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Id { get; set; }
+
+    /// <summary><c>tenant_id</c> — Obrigatório.</summary>
+    [JsonPropertyName("tenant_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? TenantId { get; set; }
+
+    /// <summary><c>email</c> — Obrigatório.</summary>
+    [JsonPropertyName("email")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Email { get; set; }
+
+    /// <summary><c>name</c></summary>
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; set; }
+
+    /// <summary><c>role</c> — Role of the key/user (super_admin is via the admin token). Obrigatório.</summary>
+    [JsonPropertyName("role")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Role { get; set; }
+
+    /// <summary><c>phone</c> — Phone in E.164 (+DDIdigits).</summary>
+    [JsonPropertyName("phone")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Phone { get; set; }
+
+    /// <summary><c>job_title</c></summary>
+    [JsonPropertyName("job_title")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? JobTitle { get; set; }
+
+    /// <summary><c>avatar_url</c></summary>
+    [JsonPropertyName("avatar_url")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? AvatarUrl { get; set; }
+
+    /// <summary><c>email_verified_at</c></summary>
+    [JsonPropertyName("email_verified_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? EmailVerifiedAt { get; set; }
+
+    /// <summary><c>phone_verified_at</c></summary>
+    [JsonPropertyName("phone_verified_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? PhoneVerifiedAt { get; set; }
+
+    /// <summary><c>notify_whatsapp</c> — Opt-in to receive integration advisories over WhatsApp.</summary>
+    [JsonPropertyName("notify_whatsapp")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? NotifyWhatsapp { get; set; }
+
+    /// <summary><c>created_at</c></summary>
+    [JsonPropertyName("created_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? CreatedAt { get; set; }
+
+    /// <summary><c>updated_at</c></summary>
+    [JsonPropertyName("updated_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? UpdatedAt { get; set; }
+}
+
+/// <summary><c>WAMessageRef</c> (veja a referência da API).</summary>
+public class WAMessageRef : BzapperObject
+{
+    /// <summary><c>wa_message_id</c> — WhatsApp id of the resulting message. Obrigatório.</summary>
+    [JsonPropertyName("wa_message_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? WaMessageId { get; set; }
 }
 
 /// <summary><c>Webhook</c> (veja a referência da API).</summary>

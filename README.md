@@ -7,7 +7,7 @@ Connect** — com novas tentativas idempotentes, erros tipados e modelos tipados
 (e só no `netstandard2.0`).
 
 ```bash
-dotnet add package Bzapper --version 0.6.2
+dotnet add package Bzapper --version 0.7.1
 ```
 
 ```csharp
@@ -71,6 +71,32 @@ await bz.UpdateContactAsync(contactId, new UpdateContact
 
 Respostas `{ "data": [...] }` voltam **inteiras** (`list.Data`, mais o que vier junto). Operações que a API
 responde com 204 retornam `Task`; as sem schema na spec retornam `JsonElement?`.
+
+### Resultado tipado: `XxxTypedAsync`
+
+Algumas operações retornavam `JsonElement?` na 0.7.0 porque a spec ainda não descrevia a resposta. Elas <!-- sem-bump -->
+ganharam modelo, mas o `XxxAsync` **continua** devolvendo `JsonElement?` (a assinatura publicada não muda —
+seu código compila e roda igual). O resultado tipado vem num método irmão, `XxxTypedAsync`, com os mesmos
+parâmetros:
+
+```csharp
+JsonElement? raw = await bz.PauseCampaignAsync(campaignId);           // como antes (JSON sem tipo)
+CampaignStatusChange st = await bz.PauseCampaignTypedAsync(campaignId);  // tipado
+```
+
+| Operação | `XxxTypedAsync` devolve |
+|---|---|
+| `CreateMyKey` / `ListMyKeys` | `ApiKeyCreated` / `ApiKeyList` |
+| `PauseCampaign` / `ResumeCampaign` / `CancelCampaign` | `CampaignStatusChange` |
+| `EditMessage` / `ForwardMessage` | `WAMessageRef` |
+| `GetBlocklist` | `Blocklist` |
+| `OfferCall` | `CallOffered` |
+| `JoinGroup` / `GroupInviteLink` / `ListJoinRequests` | `GroupJoined` / `GroupInviteLink` / `JoinRequestList` |
+| `ApplyBrand` / `UploadBrandLogo` | `BrandApplyResult` / `BrandLogoUploaded` |
+| `GetAccountUsage` | `AccountUsage` |
+| `UpdateProfile` | `ProfileUpdated` |
+
+Operações novas já nascem tipadas no próprio `XxxAsync`.
 
 ## Mensagens
 
@@ -157,7 +183,7 @@ Os estados conhecidos estão em `InstanceStatusValues` (`Connected`, `QrPending`
 ```csharp
 var group = await bz.CreateGroupAsync(new CreateGroup { Name = "Clientes VIP", Participants = new() { "+5511988887777" } }, instanceId);
 await bz.UpdateGroupParticipantsAsync(group.Jid!, new UpdateGroupParticipantsRequest { Action = "add", Participants = new() { "+5511977776666" } }, instanceId);
-var invite = await bz.GroupInviteLinkAsync(group.Jid!, instanceId);
+var invite = await bz.GroupInviteLinkTypedAsync(group.Jid!, instanceId);   // invite.InviteLink
 
 var inbox = await bz.ListConversationsAsync(instanceId: instanceId);
 var history = await bz.ConversationHistoryAsync("5511999999999@s.whatsapp.net", instanceId: instanceId, limit: 50);
@@ -324,7 +350,7 @@ await bz.SendTextAsync(
 Cada release declara se muda a superfície pública. Fixe a versão exata e atualize de propósito:
 
 ```xml
-<PackageReference Include="Bzapper" Version="[0.6.2]" />
+<PackageReference Include="Bzapper" Version="[0.7.1]" />
 ```
 
 ## Desenvolvimento
@@ -337,6 +363,9 @@ python3 tools/generate.py --check             # falha se o código gerado estive
 
 Os arquivos em `src/Bzapper/Generated/` e `tests/Bzapper.Tests/OpTable.g.cs` são gerados a partir de
 `packages/sdk/openapi.yaml` (só no monorepo) — não edite à mão.
+
+O gerador trava a superfície publicada em `tools/api-baseline.json` (retorno, tipos e nomes de parâmetros de
+cada `XxxAsync`): mudança na spec que quebraria quem já usa a SDK aborta a geração.
 
 ## Licença
 

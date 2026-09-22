@@ -49,7 +49,7 @@ public sealed partial class PartnerClient
     }
 
     /// <summary>Get one connection (status, account, numbers) — <c>GET /partner/connections/{id}</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Partner connection ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>O objeto <see cref="PartnerConnection"/> devolvido pela API.</returns>
@@ -89,7 +89,7 @@ public sealed partial class PartnerClient
     }
 
     /// <summary>End a connection (revokes the key; does NOT cancel the customer's plan) — <c>DELETE /partner/connections/{id}</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Partner connection ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>Nada (a API responde sem corpo).</returns>
@@ -102,7 +102,7 @@ public sealed partial class PartnerClient
     }
 
     /// <summary>Issue a new API key for a completed connection (the previous key stops working) — <c>POST /partner/connections/{id}/rotate-key</c>.</summary>
-    /// <param name="id"><c>id</c> (caminho). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Partner connection ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
     /// <returns>O objeto <see cref="PartnerConnectionWithKey"/> devolvido pela API.</returns>
