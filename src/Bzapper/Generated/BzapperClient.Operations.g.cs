@@ -246,6 +246,22 @@ public sealed partial class BzapperClient
         return Http.SendVoidAsync(HttpMethod.Delete, path, null, null, options, cancellationToken);
     }
 
+    /// <summary>Rotate a tenant API key. Admin only. — <c>POST /keys/{id}/rotate</c>.</summary>
+    /// <remarks>Creates a NEW key inheriting the old one's role, scopes, project and name, and keeps the OLD key working for a grace period so a running integration does not break mid-deploy. The raw key is shown ONCE. After the deadline the old key answers `401 key_expired`. `revoke_in_seconds: 0` revokes it immediately (default 86400, max 30 days). Partner keys (bZapper Connect) rotate through `/partner/connections/{id}/rotate-key`.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. API key ID (UUID).</param>
+    /// <param name="request">Corpo da requisição (<see cref="RotateApiKey"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="ApiKeyRotated"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<ApiKeyRotated> RotateMyKeyAsync(string id, RotateApiKey request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/keys/" + PathSegment.Encode(id, "id") + "/rotate";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<ApiKeyRotated>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
     /// <summary>Update the shared identity — <c>PUT /brand</c>.</summary>
     /// <param name="request">Corpo da requisição (<see cref="BrandProfile"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
@@ -1376,6 +1392,21 @@ public sealed partial class BzapperClient
         var path = "/contacts/" + PathSegment.Encode(id, "id") + "/history";
         var query = new Query().Add("limit", limit);
         return Http.SendAsync<ContactHistoryList>(HttpMethod.Get, path, query, null, options, cancellationToken);
+    }
+
+    /// <summary>Import contacts in bulk — <c>POST /contacts/import</c>.</summary>
+    /// <remarks>Upserts up to 1000 contacts by phone in one call. A new contact is created with `source: import` and `status: pending_validation` (it needs opt-in before a campaign). An existing one has only its informed fields updated — a blank value never erases what is there. A suppressed/opted-out/blocked contact is reported in `skipped_rows` and never resurrected. Tags and groups are created on demand. A bad row is reported in `errors` and does NOT fail the rest of the call. `dry_run` validates everything and writes nothing.</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="ContactImport"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="ContactImportResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<ContactImportResult> ImportContactsAsync(ContactImport request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/contacts/import";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<ContactImportResult>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
     }
 
     /// <summary>List the contact-group dictionary — <c>GET /contact-groups</c>.</summary>

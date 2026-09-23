@@ -100,6 +100,17 @@ internal sealed class BzapperHttp : IDisposable
         return document?.RootElement.Clone();
     }
 
+    /// <summary>
+    /// Operação cuja resposta 2xx é TEXTO, não JSON (hoje só o CSV de <c>GET /contacts/export</c>): devolve o corpo
+    /// cru, sem tentar decodificar JSON (a regra "2xx não-JSON = INVALID_RESPONSE" não vale para ela). Erros seguem
+    /// virando <see cref="BzapperException"/> normalmente.
+    /// </summary>
+    internal async Task<string> SendRawTextAsync(HttpMethod method, string path, Query? query, RequestBody? body, string accept, RequestOptions? options, CancellationToken cancellationToken)
+    {
+        var response = await ExecuteAsync(method, path, query, body, options, cancellationToken, accept).ConfigureAwait(false);
+        return response.Text;
+    }
+
     /// <summary>Resposta tipada obrigatória: corpo vazio ou <c>null</c> é <c>INVALID_RESPONSE</c>.</summary>
     internal async Task<T> SendAsync<T>(HttpMethod method, string path, Query? query, RequestBody? body, RequestOptions? options, CancellationToken cancellationToken)
         where T : class
@@ -157,7 +168,7 @@ internal sealed class BzapperHttp : IDisposable
         }
     }
 
-    private async Task<RawResponse> ExecuteAsync(HttpMethod method, string path, Query? query, RequestBody? body, RequestOptions? options, CancellationToken cancellationToken)
+    private async Task<RawResponse> ExecuteAsync(HttpMethod method, string path, Query? query, RequestBody? body, RequestOptions? options, CancellationToken cancellationToken, string? accept = null)
     {
         var url = _baseUrl + path + (query?.ToString() ?? string.Empty);
 
@@ -183,7 +194,7 @@ internal sealed class BzapperHttp : IDisposable
                 attemptCts.CancelAfter(timeout);
                 try
                 {
-                    using var request = BuildRequest(method, url, body, requestId, idempotencyKey, projectId);
+                    using var request = BuildRequest(method, url, body, requestId, idempotencyKey, projectId, accept);
                     using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseContentRead, attemptCts.Token).ConfigureAwait(false);
                     var text = await ReadBodyAsync(response.Content, attemptCts.Token).ConfigureAwait(false);
                     var status = (int)response.StatusCode;
@@ -223,11 +234,21 @@ internal sealed class BzapperHttp : IDisposable
         }
     }
 
-    private HttpRequestMessage BuildRequest(HttpMethod method, string url, RequestBody? body, string requestId, string? idempotencyKey, string? projectId)
+    private HttpRequestMessage BuildRequest(HttpMethod method, string url, RequestBody? body, string requestId, string? idempotencyKey, string? projectId, string? accept = null)
     {
         var request = new HttpRequestMessage(method, url);
         request.Headers.TryAddWithoutValidation("Authorization", _authorization);
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        if (accept is null)
+        {
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        }
+        else
+        {
+            // Operação que devolve texto (CSV): pede o tipo dela e deixa o JSON só para o corpo de erro.
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(accept));
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json", 0.5));
+        }
+
         request.Headers.TryAddWithoutValidation("X-Bzapper-Client", ClientHeader);
         request.Headers.TryAddWithoutValidation("User-Agent", ClientHeader);
         request.Headers.TryAddWithoutValidation("X-Request-Id", requestId);

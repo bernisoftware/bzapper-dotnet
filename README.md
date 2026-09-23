@@ -7,7 +7,7 @@ Connect** — com novas tentativas idempotentes, erros tipados e modelos tipados
 (e só no `netstandard2.0`).
 
 ```bash
-dotnet add package Bzapper --version 0.7.1
+dotnet add package Bzapper --version 0.8.0
 ```
 
 ```csharp
@@ -47,9 +47,27 @@ using var bz = new BzapperClient("bz_live_...", new BzapperClientOptions
 Crie **um** cliente por chave e reutilize-o (é thread-safe; mantém o pool de conexões). Nenhuma chamada de
 rede acontece na construção; chave vazia lança `ArgumentException` na hora.
 
-Toda requisição envia `Authorization: Bearer <chave>`, `Accept: application/json`,
-`X-Bzapper-Client: bzapper-dotnet/<versão>` (e o mesmo `User-Agent`), um `X-Request-Id` por chamada,
-`Idempotency-Key` nas escritas e `Accept-Language`/`X-Project-Id` quando configurados.
+Toda requisição envia `Authorization: Bearer <chave>`, `Accept: application/json` (a exportação em CSV pede
+`text/csv`), `X-Bzapper-Client: bzapper-dotnet/<versão>` (e o mesmo `User-Agent`), um `X-Request-Id` por
+chamada, `Idempotency-Key` nas escritas e `Accept-Language`/`X-Project-Id` quando configurados.
+
+### Rotação de chave sem derrubar a integração
+
+`RotateMyKeyAsync` cria uma chave NOVA (mesma função, escopos, projeto e nome) e mantém a antiga
+funcionando por um período de graça — dá tempo de fazer o deploy sem janela de erro. A chave crua aparece
+**uma única vez**, em `ApiKey`:
+
+```csharp
+var rotated = await bz.RotateMyKeyAsync(keyId, new RotateApiKey { RevokeInSeconds = 3600 });  // padrão 86400, máx. 30 dias
+Console.WriteLine(rotated.ApiKey);                 // bz_live_… — guarde AGORA, não volta a ser exibida
+Console.WriteLine(rotated.OldKeyExpiresAt);        // quando a antiga para de responder (null se revogada na hora)
+Console.WriteLine(rotated.PreviousKey?.RotatedTo); // id da nova, gravado na antiga
+```
+
+`RevokeInSeconds = 0` revoga a antiga imediatamente. Depois do prazo ela responde `401 key_expired`; chave já
+revogada ou já vencida dá `ConflictException` (`key_already_revoked` / `key_already_expired`), e a operação é
+de admin (`PermissionDeniedException` com `admin_required` para os demais). As chaves de parceiro
+(bZapper Connect) rotacionam por `RotatePartnerConnectionKeyAsync`.
 
 ## Modelos: omitido × `null`, campos novos
 
@@ -201,6 +219,44 @@ var check = await bz.ContactsCheckAsync(new ContactCheckRequest { InstanceId = i
 
 O vínculo contato ↔ número/projeto é automático (a API correlaciona pelas mensagens); os filtros só leem.
 
+### Importar em lote
+
+`ImportContactsAsync` faz upsert de até **1000** contatos por telefone numa chamada. Linha ruim não derruba o
+resto (ela vai em `Errors`); contato suprimido/opt-out/bloqueado aparece em `SkippedRows` e nunca é
+ressuscitado; tags e grupos são criados sob demanda. `DryRun = true` valida tudo e **não grava nada**:
+
+```csharp
+var result = await bz.ImportContactsAsync(new ContactImport
+{
+    DryRun = true,
+    Contacts = new()
+    {
+        new ContactImportRow { Phone = "+5511999999999", Name = "Ana", Email = "ana@exemplo.com", Tags = new() { "vip" } },
+        new ContactImportRow { Phone = "+5511888888888", Name = "Bruno", Address = new ContactAddress { City = "São Paulo", State = "SP" } },
+    },
+});
+
+Console.WriteLine($"{result.Total}: {result.Created} criados, {result.Updated} atualizados, {result.Skipped} ignorados, {result.Failed} com erro");
+foreach (var row in result.Errors ?? new())
+    Console.WriteLine($"linha {row.Index} ({row.Phone}): {row.Reason} {row.Detail}");
+```
+
+Lote acima do teto é `ValidationException` (`import_too_large`).
+
+### Exportar em CSV
+
+`ExportContactsAsync` aceita os **mesmos filtros** de `ListContactsAsync` (sem `offset`) e é a única operação
+que devolve **texto**, não JSON: o CSV volta cru, como `string`, exatamente como a API mandou (cabeçalho
+`phone,name,email,status,source,tags,groups,created_at,last_activity_at`; tags e grupos unidos por `;`, datas
+RFC 3339 em UTC). Grave direto em disco ou jogue no seu leitor de CSV:
+
+```csharp
+var csv = await bz.ExportContactsAsync(tags: new[] { "vip" }, hasEmail: true, sort: "name", limit: 5000);
+File.WriteAllText("contatos.csv", csv, Encoding.UTF8);
+```
+
+A API envia em fluxo, mas a SDK junta o texto na memória — em bases grandes, fatie com `limit` e os filtros.
+
 ## Campanhas
 
 ```csharp
@@ -350,7 +406,7 @@ await bz.SendTextAsync(
 Cada release declara se muda a superfície pública. Fixe a versão exata e atualize de propósito:
 
 ```xml
-<PackageReference Include="Bzapper" Version="[0.7.1]" />
+<PackageReference Include="Bzapper" Version="[0.8.0]" />
 ```
 
 ## Desenvolvimento
@@ -362,7 +418,9 @@ python3 tools/generate.py --check             # falha se o código gerado estive
 ```
 
 Os arquivos em `src/Bzapper/Generated/` e `tests/Bzapper.Tests/OpTable.g.cs` são gerados a partir de
-`packages/sdk/openapi.yaml` (só no monorepo) — não edite à mão.
+`packages/sdk/openapi.yaml` (só no monorepo) — não edite à mão. A exceção é
+`src/Bzapper/BzapperClient.Export.cs` (`ExportContactsAsync`): como a resposta é CSV, ela fica fora dos casos
+de conformidade gerados e é escrita e testada à mão.
 
 O gerador trava a superfície publicada em `tools/api-baseline.json` (retorno, tipos e nomes de parâmetros de
 cada `XxxAsync`): mudança na spec que quebraria quem já usa a SDK aborta a geração.

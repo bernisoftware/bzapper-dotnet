@@ -247,6 +247,17 @@ public class ApiKey : BzapperObject
     [JsonPropertyName("partner_connection_id")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? PartnerConnectionId { get; set; }
+
+    /// <summary><c>expires_at</c> — When a rotated key stops working (grace period). Null when not rotated.</summary>
+    [JsonPropertyName("expires_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary><c>rotated_to</c> — Id of the key that replaced this one (set by rotateMyKey).</summary>
+    [JsonPropertyName("rotated_to")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? RotatedTo { get; set; }
 }
 
 /// <summary><c>ApiKeyCreated</c> (veja a referência da API).</summary>
@@ -270,6 +281,31 @@ public class ApiKeyList : BzapperObject
     [JsonPropertyName("data")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<ApiKey>? Data { get; set; }
+}
+
+/// <summary><c>ApiKeyRotated</c> (veja a referência da API).</summary>
+public class ApiKeyRotated : BzapperObject
+{
+    /// <summary><c>api_key</c> — RAW new key — shown only once. Obrigatório.</summary>
+    [JsonPropertyName("api_key")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ApiKey { get; set; }
+
+    /// <summary><c>key</c> — Obrigatório.</summary>
+    [JsonPropertyName("key")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ApiKey? Key { get; set; }
+
+    /// <summary><c>previous_key</c></summary>
+    [JsonPropertyName("previous_key")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ApiKey? PreviousKey { get; set; }
+
+    /// <summary><c>old_key_expires_at</c> — When the old key stops working. Null when revoked immediately.</summary>
+    [JsonPropertyName("old_key_expires_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? OldKeyExpiresAt { get; set; }
 }
 
 /// <summary><c>ApplyChatLabelRequest</c> (veja a referência da API).</summary>
@@ -1055,6 +1091,132 @@ public class ContactHistoryList : BzapperObject
     [JsonPropertyName("data")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<HistoryItem>? Data { get; set; }
+}
+
+/// <summary><c>ContactImport</c> (veja a referência da API).</summary>
+public class ContactImport : BzapperObject
+{
+    /// <summary><c>contacts</c> — Obrigatório.</summary>
+    [JsonPropertyName("contacts")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<ContactImportRow>? Contacts { get; set; }
+
+    /// <summary><c>dry_run</c> — Validates and reports without writing anything.</summary>
+    [JsonPropertyName("dry_run")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? DryRun { get; set; }
+}
+
+/// <summary><c>ContactImportResult</c> (veja a referência da API).</summary>
+public class ContactImportResult : BzapperObject
+{
+    /// <summary><c>dry_run</c></summary>
+    [JsonPropertyName("dry_run")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? DryRun { get; set; }
+
+    /// <summary><c>total</c> — Obrigatório.</summary>
+    [JsonPropertyName("total")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Total { get; set; }
+
+    /// <summary><c>created</c> — Obrigatório.</summary>
+    [JsonPropertyName("created")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Created { get; set; }
+
+    /// <summary><c>updated</c> — Obrigatório.</summary>
+    [JsonPropertyName("updated")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Updated { get; set; }
+
+    /// <summary><c>skipped</c> — Obrigatório.</summary>
+    [JsonPropertyName("skipped")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Skipped { get; set; }
+
+    /// <summary><c>failed</c> — Obrigatório.</summary>
+    [JsonPropertyName("failed")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Failed { get; set; }
+
+    /// <summary><c>skipped_rows</c></summary>
+    [JsonPropertyName("skipped_rows")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<ContactImportRowIssue>? SkippedRows { get; set; }
+
+    /// <summary><c>errors</c></summary>
+    [JsonPropertyName("errors")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<ContactImportRowIssue>? Errors { get; set; }
+}
+
+/// <summary><c>ContactImportRow</c> (veja a referência da API).</summary>
+public class ContactImportRow : BzapperObject
+{
+    /// <summary><c>phone</c> — +DDIdigits. Obrigatório.</summary>
+    [JsonPropertyName("phone")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Phone { get; set; }
+
+    /// <summary><c>name</c></summary>
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; set; }
+
+    /// <summary><c>email</c></summary>
+    [JsonPropertyName("email")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Email { get; set; }
+
+    /// <summary><c>document</c></summary>
+    [JsonPropertyName("document")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Document { get; set; }
+
+    /// <summary><c>document_type</c></summary>
+    [JsonPropertyName("document_type")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? DocumentType { get; set; }
+
+    /// <summary><c>address</c> — Postal address of the contact.</summary>
+    [JsonPropertyName("address")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ContactAddress? Address { get; set; }
+
+    /// <summary><c>tags</c></summary>
+    [JsonPropertyName("tags")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Tags { get; set; }
+
+    /// <summary><c>groups</c></summary>
+    [JsonPropertyName("groups")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Groups { get; set; }
+}
+
+/// <summary><c>ContactImportRowIssue</c> (veja a referência da API).</summary>
+public class ContactImportRowIssue : BzapperObject
+{
+    /// <summary><c>index</c> — Position of the row in the sent array. Obrigatório.</summary>
+    [JsonPropertyName("index")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Index { get; set; }
+
+    /// <summary><c>phone</c></summary>
+    [JsonPropertyName("phone")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Phone { get; set; }
+
+    /// <summary><c>reason</c> — Errors: phone_required, invalid_phone, invalid_email, write_failed, taxonomy_failed. Skips: duplicate_phone, suppressed, opted_out, blocked, unreachable, deleted. Obrigatório.</summary>
+    [JsonPropertyName("reason")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Reason { get; set; }
+
+    /// <summary><c>detail</c></summary>
+    [JsonPropertyName("detail")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Detail { get; set; }
 }
 
 /// <summary><c>ContactList</c> (veja a referência da API).</summary>
@@ -3244,6 +3406,15 @@ public class RejectCallRequest : BzapperObject
     [JsonPropertyName("call_id")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? CallId { get; set; }
+}
+
+/// <summary><c>RotateApiKey</c> (veja a referência da API).</summary>
+public class RotateApiKey : BzapperObject
+{
+    /// <summary><c>revoke_in_seconds</c> — Grace period for the OLD key. 0 revokes it immediately.</summary>
+    [JsonPropertyName("revoke_in_seconds")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? RevokeInSeconds { get; set; }
 }
 
 /// <summary>A scheduled send (held until scheduled_at).</summary>

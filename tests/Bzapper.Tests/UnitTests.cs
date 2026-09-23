@@ -434,6 +434,74 @@ public class UnitTests
         }
     }
 
+    // ── CSV (exportContacts) ───────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// `GET /contacts/export` devolve CSV, não JSON (BRIEF §6): fica fora dos casos gerados e é coberto aqui —
+    /// mesmos filtros de `listContacts` na query, sem tentar decodificar JSON, texto intacto.
+    /// </summary>
+    [Fact]
+    public async Task ExportContacts_SendsTheListFilters_AndReturnsTheCsvTextIntact()
+    {
+        // Linha com vírgula e aspas dentro do campo: se algo tentasse tratar isso como JSON, ou reescrever o
+        // texto, o conteúdo não voltaria igual.
+        const string csv = "phone,name,email,status,source,tags,groups,created_at,last_activity_at\n"
+            + "+5511999990000,\"Ana, a \"\"vip\"\"\",ana@exemplo.com,active,import,vip;lead,clientes,2026-09-01T03:00:00Z,\n"
+            + "+5511888880000,Bruno,,pending_validation,manual,,,2026-09-02T03:00:00Z,2026-09-10T12:00:00Z\n";
+        using var server = new MockServer
+        {
+            Handler = _ => new MockResponse(
+                200,
+                csv,
+                new Dictionary<string, string> { ["Content-Disposition"] = "attachment; filename=\"contacts.csv\"" },
+                "text/csv; charset=utf-8"),
+        };
+        using var client = Client(server);
+
+        var text = await client.ExportContactsAsync(
+            search: "ana",
+            tags: new[] { "vip", "lead" },
+            tagsMatch: "all",
+            hasEmail: true,
+            createdAfter: new DateTimeOffset(2026, 9, 1, 0, 0, 0, TimeSpan.FromHours(-3)),
+            sort: "name",
+            limit: 5000);
+
+        Assert.Equal(csv, text);                                          // texto cru, byte a byte
+        Assert.Contains("\"Ana, a \"\"vip\"\"\"", text);
+
+        var request = server.Requests.Single();
+        Assert.Equal("GET", request.Method);
+        Assert.Equal("/contacts/export", request.Path);
+        Assert.Equal(
+            new[]
+            {
+                "search=ana", "tags=vip,lead", "tags_match=all", "has_email=true",
+                "created_after=2026-09-01T03:00:00Z", "sort=name", "limit=5000",
+            },
+            request.Query.Select(p => $"{p.Key}={p.Value}"));
+
+        // Pede CSV (o JSON fica só para o corpo de erro) e NÃO passou pelo caminho de parse JSON — se tivesse
+        // passado, este corpo (que não é JSON) teria virado INVALID_RESPONSE.
+        Assert.StartsWith("text/csv", request.Header("Accept"));
+        Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(text));
+    }
+
+    [Fact]
+    public async Task ExportContacts_StillRaisesTypedErrors()
+    {
+        using var server = new MockServer
+        {
+            Handler = _ => MockResponse.Json(401, new { code = "invalid_api_key", message = "chave inválida", locale = "pt-BR" }),
+        };
+        using var client = Client(server);
+
+        var error = await Assert.ThrowsAsync<AuthenticationException>(() => client.ExportContactsAsync());
+
+        Assert.Equal("invalid_api_key", error.Code);
+        Assert.Equal(401, error.Status);
+    }
+
     // ── webhooks ───────────────────────────────────────────────────────────────────────────────────────
 
     [Fact]
