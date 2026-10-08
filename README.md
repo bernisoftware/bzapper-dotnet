@@ -7,7 +7,7 @@ Connect** — com novas tentativas idempotentes, erros tipados e modelos tipados
 (e só no `netstandard2.0`).
 
 ```bash
-dotnet add package Bzapper --version 0.8.1
+dotnet add package Bzapper --version 0.8.2
 ```
 
 ```csharp
@@ -143,7 +143,7 @@ await bz.SendAudioAsync(new SendMedia { To = "+5511999999999", Media = new Media
 
 // Localização, contato (vCard), enquete, reação
 await bz.SendLocationAsync(new SendLocation { To = "+5511999999999", Latitude = -23.55, Longitude = -46.63, Name = "Escritório" });
-await bz.SendContactAsync(new SendContact { To = "+5511999999999", ContactName = "Ana", ContactVcard = vcard });
+await bz.SendContactAsync(new SendContact { To = "+5511999999999", ContactName = "Ana", ContactPhone = "+5511977776666" });
 await bz.SendPollAsync(new SendPoll { To = "+5511999999999", Name = "Melhor dia?", Options = new() { "Seg", "Qua", "Sex" } });
 await bz.SendReactionAsync(new SendReaction { To = "+5511999999999", QuotedMessageId = msg.MessageId, Emoji = "👍" });
 
@@ -406,7 +406,7 @@ await bz.SendTextAsync(
 Cada release declara se muda a superfície pública. Fixe a versão exata e atualize de propósito:
 
 ```xml
-<PackageReference Include="Bzapper" Version="[0.8.1]" />
+<PackageReference Include="Bzapper" Version="[0.8.2]" />
 ```
 
 ## Desenvolvimento

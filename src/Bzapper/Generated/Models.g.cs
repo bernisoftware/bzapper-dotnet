@@ -1819,12 +1819,12 @@ public class Entitlements : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public long? SendsUsed { get; set; }
 
-    /// <summary><c>messages_used</c> — Messages this month (sends + monitored receives).</summary>
+    /// <summary><c>messages_used</c> — Interactions this month: messages SENT + messages RECEIVED (the Free allowance counts both).</summary>
     [JsonPropertyName("messages_used")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public long? MessagesUsed { get; set; }
 
-    /// <summary><c>message_free_count</c> — Free messages/month (allowance).</summary>
+    /// <summary><c>message_free_count</c> — Free allowance: interactions per month (sent + received). 250 on the Free plan.</summary>
     [JsonPropertyName("message_free_count")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? MessageFreeCount { get; set; }
@@ -3492,7 +3492,7 @@ public class SendBase : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? Sticky { get; set; }
 
-    /// <summary><c>to</c> — Destination E.164 phone or JID. Obrigatório.</summary>
+    /// <summary><c>to</c> — Destination: E.164 phone (+DDIdigits), contact JID (…@s.whatsapp.net), group JID (…@g.us) or the contact's @lid. A @lid is translated to the phone when the connected number knows it; the official rail accepts phone only. Obrigatório.</summary>
     [JsonPropertyName("to")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? To { get; set; }
@@ -3561,12 +3561,17 @@ public class SendButtons : SendBase
 /// <summary><c>SendContact</c> (veja a referência da API).</summary>
 public class SendContact : SendBase
 {
-    /// <summary><c>contact_name</c></summary>
+    /// <summary><c>contact_name</c> — Name shown on the card.</summary>
     [JsonPropertyName("contact_name")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ContactName { get; set; }
 
-    /// <summary><c>contact_vcard</c></summary>
+    /// <summary><c>contact_phone</c> — The CARD CONTACT's phone in E.164 — the person being shared, never the destination. Required with contact_name (not needed when you send a ready contact_vcard); it is what makes WhatsApp recognise the card as a contact.</summary>
+    [JsonPropertyName("contact_phone")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ContactPhone { get; set; }
+
+    /// <summary><c>contact_vcard</c> — Ready vCard; when present, contact_name/contact_phone are not used to build one.</summary>
     [JsonPropertyName("contact_vcard")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ContactVcard { get; set; }
