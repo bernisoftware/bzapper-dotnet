@@ -2172,6 +2172,20 @@ public class GetMeResultBfocus : BzapperObject
     public string? UserHash { get; set; }
 }
 
+/// <summary><c>GetOTPTemplateResult</c> (veja a referência da API).</summary>
+public class GetOTPTemplateResult : BzapperObject
+{
+    /// <summary><c>template</c> — null when none was chosen.</summary>
+    [JsonPropertyName("template")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Template? Template { get; set; }
+
+    /// <summary><c>eligibility</c> — What Meta requires to allow Authentication templates, and the state of each criterion.</summary>
+    [JsonPropertyName("eligibility")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public OTPEligibility? Eligibility { get; set; }
+}
+
 /// <summary><c>GetOfficialMediaResult</c> (veja a referência da API).</summary>
 public class GetOfficialMediaResult : BzapperObject
 {
@@ -3217,6 +3231,40 @@ public class NumberEligibility : BzapperObject
     [JsonPropertyName("reason")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Reason { get; set; }
+}
+
+/// <summary>What Meta requires to allow Authentication templates, and the state of each criterion.</summary>
+public class OTPEligibility : BzapperObject
+{
+    /// <summary><c>business_verification</c> — Meta business verification status: verified, pending, not_verified, rejected… (empty when it could not be read).</summary>
+    [JsonPropertyName("business_verification")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? BusinessVerification { get; set; }
+
+    /// <summary><c>messaging_limit</c> — Current sending limit of the number (e.g. TIER_250).</summary>
+    [JsonPropertyName("messaging_limit")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? MessagingLimit { get; set; }
+
+    /// <summary><c>required_limit</c> — Limit Meta requires (TIER_2K).</summary>
+    [JsonPropertyName("required_limit")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? RequiredLimit { get; set; }
+
+    /// <summary><c>verification_ok</c></summary>
+    [JsonPropertyName("verification_ok")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? VerificationOk { get; set; }
+
+    /// <summary><c>limit_ok</c></summary>
+    [JsonPropertyName("limit_ok")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? LimitOk { get; set; }
+
+    /// <summary><c>approved_auth_templates</c> — Approved Authentication templates in the project.</summary>
+    [JsonPropertyName("approved_auth_templates")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? ApprovedAuthTemplates { get; set; }
 }
 
 /// <summary><c>OfferCallRequest</c> (veja a referência da API).</summary>
@@ -4507,6 +4555,15 @@ public class SendText : SendBase
 public class SetFallbackTemplateRequest : BzapperObject
 {
     /// <summary><c>template_id</c> — Empty clears the fallback.</summary>
+    [JsonPropertyName("template_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? TemplateId { get; set; }
+}
+
+/// <summary><c>SetOTPTemplateRequest</c> (veja a referência da API).</summary>
+public class SetOTPTemplateRequest : BzapperObject
+{
+    /// <summary><c>template_id</c> — Empty clears the choice.</summary>
     [JsonPropertyName("template_id")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? TemplateId { get; set; }

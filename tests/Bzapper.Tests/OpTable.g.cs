@@ -179,6 +179,8 @@ internal static partial class OpTable
         ["sendVideo"] = async (c, p, a, o) => { return await c.SendVideoAsync(a.Body<SendMedia>(), options: o); },
         ["setBrand"] = async (c, p, a, o) => { return await c.SetBrandAsync(a.Body<BrandProfile>(), options: o); },
         ["setDefaultOfficialNumber"] = async (c, p, a, o) => { a.NoBody(); await c.SetDefaultOfficialNumberAsync(a.Path("id"), options: o); return null; },
+        ["getOTPTemplate"] = async (c, p, a, o) => { a.NoBody(); return await c.GetOTPTemplateAsync(options: o); },
+        ["setOTPTemplate"] = async (c, p, a, o) => { await c.SetOTPTemplateAsync(a.Body<SetOTPTemplateRequest>(), options: o); return null; },
         ["setFallbackTemplate"] = async (c, p, a, o) => { await c.SetFallbackTemplateAsync(a.Body<SetFallbackTemplateRequest>(), options: o); return null; },
         ["setInboundFilters"] = async (c, p, a, o) => { return await c.SetInboundFiltersAsync(a.Path("id"), a.Body<InboundFilters>(), options: o); },
         ["setInstanceProxy"] = async (c, p, a, o) => { await c.SetInstanceProxyAsync(a.Path("id"), a.Body<SetProxy>(), options: o); return null; },

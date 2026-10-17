@@ -2752,6 +2752,19 @@ public sealed partial class BzapperClient
         return Http.SendAsync<GetFallbackTemplateResult>(HttpMethod.Get, path, null, null, options, cancellationToken);
     }
 
+    /// <summary>Get the verification-code template and whether Meta allows Authentication templates — <c>GET /templates/otp</c>.</summary>
+    /// <remarks>The template that carries the code of POST /messages/otp when the 24-hour window is closed (null = the first approved Authentication template is used), plus the account's eligibility for the Authentication category: Meta requires the business to be verified and the number to reach the 2,000-a-day sending limit. Each criterion comes with its current state, so the customer knows what is missing.</remarks>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="GetOTPTemplateResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<GetOTPTemplateResult> GetOTPTemplateAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/otp";
+        return Http.SendAsync<GetOTPTemplateResult>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
     /// <summary>Get one template — <c>GET /templates/{id}</c>.</summary>
     /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
@@ -2788,6 +2801,21 @@ public sealed partial class BzapperClient
     public Task SetFallbackTemplateAsync(SetFallbackTemplateRequest request, RequestOptions? options = null, CancellationToken cancellationToken = default)
     {
         var path = "/templates/fallback";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendVoidAsync(HttpMethod.Put, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
+    /// <summary>Choose the template that carries the verification code outside the window — <c>PUT /templates/otp</c>.</summary>
+    /// <remarks>Must be an APPROVED template of the Authentication category — Meta accepts codes in no other category. An empty `template_id` clears the choice (the first approved Authentication template is used again).</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="SetOTPTemplateRequest"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>Nada (a API responde sem corpo).</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task SetOTPTemplateAsync(SetOTPTemplateRequest request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/otp";
         if (request is null) throw new ArgumentNullException(nameof(request));
         return Http.SendVoidAsync(HttpMethod.Put, path, null, RequestBody.Json(request), options, cancellationToken);
     }
