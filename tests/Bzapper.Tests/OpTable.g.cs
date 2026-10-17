@@ -119,6 +119,7 @@ internal static partial class OpTable
         ["listLabels"] = async (c, p, a, o) => { a.NoBody(); return await c.ListLabelsAsync(a.QStr("instance_id")!, options: o); },
         ["listMyInvoices"] = async (c, p, a, o) => { a.NoBody(); return await c.ListMyInvoicesAsync(options: o); },
         ["listMyKeys"] = async (c, p, a, o) => { a.NoBody(); return await c.ListMyKeysTypedAsync(options: o); },
+        ["getOfficialInsights"] = async (c, p, a, o) => { a.NoBody(); return await c.GetOfficialInsightsAsync(days: a.QInt("days"), from: a.QDate("from"), to: a.QDate("to"), options: o); },
         ["uploadOfficialMedia"] = async (c, p, a, o) => { return await c.UploadOfficialMediaAsync(a.File(), instanceId: a.QStr("instance_id"), options: o); },
         ["getOfficialMedia"] = async (c, p, a, o) => { a.NoBody(); return await c.GetOfficialMediaAsync(a.Path("media_id"), instanceId: a.QStr("instance_id"), options: o); },
         ["deleteOfficialMedia"] = async (c, p, a, o) => { a.NoBody(); await c.DeleteOfficialMediaAsync(a.Path("media_id"), instanceId: a.QStr("instance_id"), options: o); return null; },

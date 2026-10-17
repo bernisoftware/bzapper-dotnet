@@ -2362,6 +2362,23 @@ public sealed partial class BzapperClient
         return Http.SendAsync<OfficialAccount>(HttpMethod.Get, path, null, null, options, cancellationToken);
     }
 
+    /// <summary>Estimated Meta cost and official-rail KPIs for a period — <c>GET /official/insights</c>.</summary>
+    /// <remarks>What Meta will charge the customer (bZapper charges only the subscription), estimated per category — marketing, utility, authentication and service — for the period, the previous period of the same length, the current month so far and its projection, plus delivery and read rates, free messages, conversations from ads, marketing opt-outs, the templates sent, the most common failure reasons and each number's quality and limit. The estimate uses the category and `billable` flag Meta reports in each status webhook and, when missing, the template's category (conservative: utility counts as charged). Prices follow the recipient's country; the rate card used (Meta's, for Brazil, in BRL) comes in `rate_card`. Messages to other countries are counted in `cost.other_countries` but not priced.</remarks>
+    /// <param name="days"><c>days</c> (query). Period ending now: 7, 30 or 90 (default 30; up to 366).</param>
+    /// <param name="from"><c>from</c> (query). Period start (RFC 3339). Overrides `days`.</param>
+    /// <param name="to"><c>to</c> (query). Period end (RFC 3339). Default: now.</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="OfficialInsights"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<OfficialInsights> GetOfficialInsightsAsync(int? days = null, DateTimeOffset? from = null, DateTimeOffset? to = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/insights";
+        var query = new Query().Add("days", days).Add("from", from).Add("to", to);
+        return Http.SendAsync<OfficialInsights>(HttpMethod.Get, path, query, null, options, cancellationToken);
+    }
+
     /// <summary>Check that a media id is still valid — <c>GET /official/media/{media_id}</c>.</summary>
     /// <remarks>Returns what Meta knows about the file (type, size, sha256). Meta's download URL is not returned: it only opens with the account token, which never leaves bZapper.</remarks>
     /// <param name="mediaId"><c>media_id</c> (caminho). Obrigatório.</param>

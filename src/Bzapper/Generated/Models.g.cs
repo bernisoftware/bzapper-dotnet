@@ -3312,6 +3312,304 @@ public class OfficialAccount : BzapperObject
     public string? InstanceId { get; set; }
 }
 
+/// <summary>Estimated Meta cost (per category, period, month projection) and official-rail KPIs.</summary>
+public class OfficialInsights : BzapperObject
+{
+    /// <summary><c>from</c></summary>
+    [JsonPropertyName("from")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? From { get; set; }
+
+    /// <summary><c>to</c></summary>
+    [JsonPropertyName("to")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? To { get; set; }
+
+    /// <summary><c>rate_card</c></summary>
+    [JsonPropertyName("rate_card")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public OfficialInsightsRateCard? RateCard { get; set; }
+
+    /// <summary><c>cost</c></summary>
+    [JsonPropertyName("cost")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public OfficialInsightsCost? Cost { get; set; }
+
+    /// <summary><c>messages</c></summary>
+    [JsonPropertyName("messages")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public OfficialInsightsMessages? Messages { get; set; }
+
+    /// <summary><c>templates</c></summary>
+    [JsonPropertyName("templates")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<OfficialInsightsTemplatesItem>? Templates { get; set; }
+
+    /// <summary><c>failures</c></summary>
+    [JsonPropertyName("failures")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<OfficialInsightsFailuresItem>? Failures { get; set; }
+
+    /// <summary><c>ad_referrals</c></summary>
+    [JsonPropertyName("ad_referrals")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? AdReferrals { get; set; }
+
+    /// <summary><c>marketing_opt_outs</c></summary>
+    [JsonPropertyName("marketing_opt_outs")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? MarketingOptOuts { get; set; }
+
+    /// <summary><c>numbers</c></summary>
+    [JsonPropertyName("numbers")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<OfficialInsightsNumbersItem>? Numbers { get; set; }
+}
+
+/// <summary><c>OfficialInsightsCost</c> (veja a referência da API).</summary>
+public class OfficialInsightsCost : BzapperObject
+{
+    /// <summary><c>currency</c></summary>
+    [JsonPropertyName("currency")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Currency { get; set; }
+
+    /// <summary><c>period</c></summary>
+    [JsonPropertyName("period")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? Period { get; set; }
+
+    /// <summary><c>previous_period</c></summary>
+    [JsonPropertyName("previous_period")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? PreviousPeriod { get; set; }
+
+    /// <summary><c>change_pct</c></summary>
+    [JsonPropertyName("change_pct")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? ChangePct { get; set; }
+
+    /// <summary><c>month_to_date</c></summary>
+    [JsonPropertyName("month_to_date")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? MonthToDate { get; set; }
+
+    /// <summary><c>projected_month</c></summary>
+    [JsonPropertyName("projected_month")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? ProjectedMonth { get; set; }
+
+    /// <summary><c>by_category</c></summary>
+    [JsonPropertyName("by_category")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<OfficialInsightsCostByCategoryItem>? ByCategory { get; set; }
+
+    /// <summary><c>confirmed</c> — Messages whose category came from Meta.</summary>
+    [JsonPropertyName("confirmed")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Confirmed { get; set; }
+
+    /// <summary><c>estimated</c> — Messages estimated from the template category.</summary>
+    [JsonPropertyName("estimated")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Estimated { get; set; }
+
+    /// <summary><c>other_countries</c> — Messages to recipients outside the priced market.</summary>
+    [JsonPropertyName("other_countries")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? OtherCountries { get; set; }
+}
+
+/// <summary><c>OfficialInsightsCostByCategoryItem</c> (veja a referência da API).</summary>
+public class OfficialInsightsCostByCategoryItem : BzapperObject
+{
+    /// <summary><c>category</c></summary>
+    [JsonPropertyName("category")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Category { get; set; }
+
+    /// <summary><c>messages</c></summary>
+    [JsonPropertyName("messages")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Messages { get; set; }
+
+    /// <summary><c>billable</c></summary>
+    [JsonPropertyName("billable")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Billable { get; set; }
+
+    /// <summary><c>cost</c></summary>
+    [JsonPropertyName("cost")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? Cost { get; set; }
+}
+
+/// <summary><c>OfficialInsightsFailuresItem</c> (veja a referência da API).</summary>
+public class OfficialInsightsFailuresItem : BzapperObject
+{
+    /// <summary><c>reason</c></summary>
+    [JsonPropertyName("reason")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Reason { get; set; }
+
+    /// <summary><c>count</c></summary>
+    [JsonPropertyName("count")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Count { get; set; }
+}
+
+/// <summary><c>OfficialInsightsMessages</c> (veja a referência da API).</summary>
+public class OfficialInsightsMessages : BzapperObject
+{
+    /// <summary><c>sent</c></summary>
+    [JsonPropertyName("sent")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Sent { get; set; }
+
+    /// <summary><c>delivered</c></summary>
+    [JsonPropertyName("delivered")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Delivered { get; set; }
+
+    /// <summary><c>read</c></summary>
+    [JsonPropertyName("read")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Read { get; set; }
+
+    /// <summary><c>failed</c></summary>
+    [JsonPropertyName("failed")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Failed { get; set; }
+
+    /// <summary><c>received</c></summary>
+    [JsonPropertyName("received")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Received { get; set; }
+
+    /// <summary><c>delivery_rate</c></summary>
+    [JsonPropertyName("delivery_rate")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? DeliveryRate { get; set; }
+
+    /// <summary><c>read_rate</c></summary>
+    [JsonPropertyName("read_rate")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? ReadRate { get; set; }
+
+    /// <summary><c>free_messages</c></summary>
+    [JsonPropertyName("free_messages")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? FreeMessages { get; set; }
+
+    /// <summary><c>contacts</c></summary>
+    [JsonPropertyName("contacts")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Contacts { get; set; }
+}
+
+/// <summary><c>OfficialInsightsNumbersItem</c> (veja a referência da API).</summary>
+public class OfficialInsightsNumbersItem : BzapperObject
+{
+    /// <summary><c>display_number</c></summary>
+    [JsonPropertyName("display_number")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? DisplayNumber { get; set; }
+
+    /// <summary><c>quality</c></summary>
+    [JsonPropertyName("quality")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Quality { get; set; }
+
+    /// <summary><c>limit</c></summary>
+    [JsonPropertyName("limit")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Limit { get; set; }
+
+    /// <summary><c>status</c></summary>
+    [JsonPropertyName("status")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Status { get; set; }
+}
+
+/// <summary><c>OfficialInsightsRateCard</c> (veja a referência da API).</summary>
+public class OfficialInsightsRateCard : BzapperObject
+{
+    /// <summary><c>market</c></summary>
+    [JsonPropertyName("market")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Market { get; set; }
+
+    /// <summary><c>currency</c></summary>
+    [JsonPropertyName("currency")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Currency { get; set; }
+
+    /// <summary><c>effective</c></summary>
+    [JsonPropertyName("effective")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Effective { get; set; }
+
+    /// <summary><c>source</c></summary>
+    [JsonPropertyName("source")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Source { get; set; }
+
+    /// <summary><c>rates</c></summary>
+    [JsonPropertyName("rates")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, double>? Rates { get; set; }
+
+    /// <summary><c>tiers</c></summary>
+    [JsonPropertyName("tiers")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<OfficialInsightsRateCardTiersItem>? Tiers { get; set; }
+}
+
+/// <summary><c>OfficialInsightsRateCardTiersItem</c> (veja a referência da API).</summary>
+public class OfficialInsightsRateCardTiersItem : BzapperObject
+{
+    /// <summary><c>from</c></summary>
+    [JsonPropertyName("from")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? From { get; set; }
+
+    /// <summary><c>rate</c></summary>
+    [JsonPropertyName("rate")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? Rate { get; set; }
+}
+
+/// <summary><c>OfficialInsightsTemplatesItem</c> (veja a referência da API).</summary>
+public class OfficialInsightsTemplatesItem : BzapperObject
+{
+    /// <summary><c>name</c></summary>
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; set; }
+
+    /// <summary><c>category</c></summary>
+    [JsonPropertyName("category")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Category { get; set; }
+
+    /// <summary><c>sent</c></summary>
+    [JsonPropertyName("sent")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Sent { get; set; }
+
+    /// <summary><c>failed</c></summary>
+    [JsonPropertyName("failed")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Failed { get; set; }
+
+    /// <summary><c>cost</c></summary>
+    [JsonPropertyName("cost")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? Cost { get; set; }
+}
+
 /// <summary>A file stored at Meta, reusable as `media.id` in sends from the same number.</summary>
 public class OfficialMedia : BzapperObject
 {
