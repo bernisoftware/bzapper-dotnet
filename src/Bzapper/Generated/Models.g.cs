@@ -4122,6 +4122,16 @@ public class SendOTP : SendBase
     [JsonPropertyName("expiry_minutes")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? ExpiryMinutes { get; set; }
+
+    /// <summary><c>template</c> — OFFICIAL RAIL ONLY, optional. Name of an approved AUTHENTICATION template to carry the code — used even inside the 24-hour window. Without it, the project's authentication template is used only when the window is closed. Ignored on the unofficial rail.</summary>
+    [JsonPropertyName("template")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Template { get; set; }
+
+    /// <summary><c>language</c> — Optional language of the authentication template (e.g. `pt_BR`).</summary>
+    [JsonPropertyName("language")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Language { get; set; }
 }
 
 /// <summary><c>SendPoll</c> (veja a referência da API).</summary>
