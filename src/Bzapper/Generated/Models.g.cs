@@ -80,6 +80,15 @@ public class AddCampaignRecipientsResult : BzapperObject
     public int? Skipped { get; set; }
 }
 
+/// <summary><c>AddOfficialNumberRequest</c> (veja a referência da API).</summary>
+public class AddOfficialNumberRequest : BzapperObject
+{
+    /// <summary><c>phone_number_id</c> — Meta's id of the number (`id` from GET /official/numbers/available). Obrigatório.</summary>
+    [JsonPropertyName("phone_number_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? PhoneNumberId { get; set; }
+}
+
 /// <summary><c>AddPoolNumberRequest</c> (veja a referência da API).</summary>
 public class AddPoolNumberRequest : BzapperObject
 {
@@ -408,6 +417,45 @@ public class BrandProfile : BzapperObject
     public string? Description { get; set; }
 }
 
+/// <summary>The business card of a number on the official rail. Empty fields clear the value on Meta, so always send the whole profile.</summary>
+public class BusinessProfile : BzapperObject
+{
+    /// <summary><c>about</c> — Short line under the name.</summary>
+    [JsonPropertyName("about")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? About { get; set; }
+
+    /// <summary><c>description</c></summary>
+    [JsonPropertyName("description")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Description { get; set; }
+
+    /// <summary><c>address</c></summary>
+    [JsonPropertyName("address")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Address { get; set; }
+
+    /// <summary><c>email</c></summary>
+    [JsonPropertyName("email")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Email { get; set; }
+
+    /// <summary><c>vertical</c> — Business sector (closed list defined by Meta).</summary>
+    [JsonPropertyName("vertical")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Vertical { get; set; }
+
+    /// <summary><c>websites</c></summary>
+    [JsonPropertyName("websites")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Websites { get; set; }
+
+    /// <summary><c>profile_picture_url</c> — Current photo, served by Meta. Only on reads; change it with the photo route.</summary>
+    [JsonPropertyName("profile_picture_url")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ProfilePictureUrl { get; set; }
+}
+
 /// <summary><c>Button</c> (veja a referência da API).</summary>
 public class Button : BzapperObject
 {
@@ -586,7 +634,7 @@ public class CampaignDryRun : BzapperObject
 /// <summary><c>CampaignEligibility</c> (veja a referência da API).</summary>
 public class CampaignEligibility : BzapperObject
 {
-    /// <summary><c>warmup_days</c> — Warm-up days required by the account's policy.</summary>
+    /// <summary><c>warmup_days</c> — Minimum connection age in days required by the account's campaign policy.</summary>
     [JsonPropertyName("warmup_days")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? WarmupDays { get; set; }
@@ -801,10 +849,10 @@ public class CampaignUpdate : BzapperObject
     public List<CampaignVariation>? Variations { get; set; }
 }
 
-/// <summary>A template variation. `body` or `media` is required (variations with neither are dropped).</summary>
+/// <summary>One message variation, rotated across recipients. On the unofficial rail it is text (`body`, optional `media`); on the official rail it is an approved Meta template (`template`) — free text only reaches people who wrote in the last 24h, and a campaign is for the ones who did not. Several template variations = an A/B test between templates.</summary>
 public class CampaignVariation : BzapperObject
 {
-    /// <summary><c>body</c> — Template body with variables ({name}) for per-contact personalization.</summary>
+    /// <summary><c>body</c> — Message body with variables ({name}) for per-contact personalization. Unofficial rail.</summary>
     [JsonPropertyName("body")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Body { get; set; }
@@ -814,10 +862,39 @@ public class CampaignVariation : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? Weight { get; set; }
 
-    /// <summary><c>media</c> — Optional media (type, url|base64, caption, filename, mimetype).</summary>
+    /// <summary><c>media</c> — Optional media (type, url|base64, caption, filename, mimetype). Unofficial rail.</summary>
     [JsonPropertyName("media")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public JsonElement? Media { get; set; }
+
+    /// <summary><c>template</c> — An APPROVED template of the project (official rail only). Checked when the campaign is created or edited: it must exist, be approved, and `variables` must have exactly as many values as the template body expects. Each value accepts {column} from the recipient list.</summary>
+    [JsonPropertyName("template")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public CampaignVariationTemplate? Template { get; set; }
+}
+
+/// <summary>An APPROVED template of the project (official rail only). Checked when the campaign is created or edited: it must exist, be approved, and `variables` must have exactly as many values as the template body expects. Each value accepts {column} from the recipient list.</summary>
+public class CampaignVariationTemplate : BzapperObject
+{
+    /// <summary><c>name</c> — Obrigatório.</summary>
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; set; }
+
+    /// <summary><c>language</c> — Required only when the template exists in more than one language.</summary>
+    [JsonPropertyName("language")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Language { get; set; }
+
+    /// <summary><c>variables</c></summary>
+    [JsonPropertyName("variables")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Variables { get; set; }
+
+    /// <summary><c>header_variables</c></summary>
+    [JsonPropertyName("header_variables")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? HeaderVariables { get; set; }
 }
 
 /// <summary><c>ChangeAddonRequest</c> (veja a referência da API).</summary>
@@ -871,6 +948,39 @@ public class CheckoutAddonCartResult : BzapperObject
     public string? InvoiceId { get; set; }
 }
 
+/// <summary><c>CompleteOfficialSignupRequest</c> (veja a referência da API).</summary>
+public class CompleteOfficialSignupRequest : BzapperObject
+{
+    /// <summary><c>code</c> — One-time code from the Embedded Signup callback (~30s lifetime). Obrigatório.</summary>
+    [JsonPropertyName("code")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Code { get; set; }
+
+    /// <summary><c>waba_id</c> — Obrigatório.</summary>
+    [JsonPropertyName("waba_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? WabaId { get; set; }
+
+    /// <summary><c>phone_number_id</c> — Optional — discovered from the WABA when the popup does not provide it.</summary>
+    [JsonPropertyName("phone_number_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? PhoneNumberId { get; set; }
+}
+
+/// <summary><c>CompleteOfficialSignupResult</c> (veja a referência da API).</summary>
+public class CompleteOfficialSignupResult : BzapperObject
+{
+    /// <summary><c>account</c> — A WhatsApp Business Account connected to a project. The access token never comes back.</summary>
+    [JsonPropertyName("account")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public OfficialAccount? Account { get; set; }
+
+    /// <summary><c>warning</c> — `webhooks_not_subscribed` or `phone_not_registered` — connected, but a step needs attention.</summary>
+    [JsonPropertyName("warning")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Warning { get; set; }
+}
+
 /// <summary>Your customer, as authenticated in your product. `name` or `company` is required.</summary>
 public class ConnectCustomer : BzapperObject
 {
@@ -913,12 +1023,12 @@ public class ConnectOfficialAccountRequest : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? WabaId { get; set; }
 
-    /// <summary><c>phone_number_id</c> — Obrigatório.</summary>
+    /// <summary><c>phone_number_id</c> — Optional — discovered from the WABA when omitted.</summary>
     [JsonPropertyName("phone_number_id")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? PhoneNumberId { get; set; }
 
-    /// <summary><c>access_token</c> — Obrigatório.</summary>
+    /// <summary><c>access_token</c> — The customer's WABA token, stored encrypted at rest. A token taken from Meta's "API Setup" screen expires in 24h; for a lasting connection use a system user with `whatsapp_business_messaging` + `whatsapp_business_management`. Obrigatório.</summary>
     [JsonPropertyName("access_token")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? AccessToken { get; set; }
@@ -933,7 +1043,7 @@ public class ConnectOfficialAccountRequest : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? VerifiedName { get; set; }
 
-    /// <summary><c>status</c> — Initial status. Omit for PENDENTE.</summary>
+    /// <summary><c>status</c> — Empty means PENDENTE, which is the correct state coming out of Embedded Signup.</summary>
     [JsonPropertyName("status")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Status { get; set; }
@@ -1407,6 +1517,27 @@ public class Conversation : BzapperObject
     [JsonPropertyName("unread")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? Unread { get; set; }
+
+    /// <summary><c>name</c> — Contact name, when known.</summary>
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; set; }
+
+    /// <summary><c>avatar_url</c></summary>
+    [JsonPropertyName("avatar_url")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? AvatarUrl { get; set; }
+
+    /// <summary><c>last_instance_id</c> — Number (instance) that handled the last message.</summary>
+    [JsonPropertyName("last_instance_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? LastInstanceId { get; set; }
+
+    /// <summary><c>last_inbound_at</c> — Last message FROM the contact. On the official rail it opens the 24-hour window: free text goes through until last_inbound_at + 24h; after that only an approved template does (or the project's fallback template is used). Absent when the contact never wrote.</summary>
+    [JsonPropertyName("last_inbound_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? LastInboundAt { get; set; }
 }
 
 /// <summary><c>ConversationList</c> (veja a referência da API).</summary>
@@ -1623,6 +1754,20 @@ public class CreateTaxon : BzapperObject
     public string? Color { get; set; }
 }
 
+/// <summary><c>CreateTemplateResult</c> (veja a referência da API).</summary>
+public class CreateTemplateResult : BzapperObject
+{
+    /// <summary><c>template</c> — A template as bZapper holds it. Meta owns the truth about `status`; this is our copy.</summary>
+    [JsonPropertyName("template")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Template? Template { get; set; }
+
+    /// <summary><c>advice</c> — Warnings that did not block the submission but change the outcome.</summary>
+    [JsonPropertyName("advice")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Advice { get; set; }
+}
+
 /// <summary><c>CreateWebhook</c> (veja a referência da API).</summary>
 public class CreateWebhook : BzapperObject
 {
@@ -1645,6 +1790,25 @@ public class CreateWebhook : BzapperObject
     [JsonPropertyName("number_filter")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? NumberFilter { get; set; }
+}
+
+/// <summary>Present ONLY when the platform took a path other than the one you asked for. Today that means one thing: the 24-hour window with the contact was closed, so the free text went out as the project fallback template instead. The platform decides, but it does not hide.</summary>
+public class DeliveryInfo : BzapperObject
+{
+    /// <summary><c>via</c></summary>
+    [JsonPropertyName("via")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Via { get; set; }
+
+    /// <summary><c>template</c> — Name of the template actually sent.</summary>
+    [JsonPropertyName("template")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Template { get; set; }
+
+    /// <summary><c>note</c> — One sentence explaining what happened, safe to show to a person.</summary>
+    [JsonPropertyName("note")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Note { get; set; }
 }
 
 /// <summary><c>EditMessageRequest</c> (veja a referência da API).</summary>
@@ -1911,6 +2075,15 @@ public class GetCampaignResult : BzapperObject
     public List<CampaignVariation>? Variations { get; set; }
 }
 
+/// <summary><c>GetFallbackTemplateResult</c> (veja a referência da API).</summary>
+public class GetFallbackTemplateResult : BzapperObject
+{
+    /// <summary><c>template</c> — null when no fallback is configured.</summary>
+    [JsonPropertyName("template")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Template? Template { get; set; }
+}
+
 /// <summary><c>GetMeResult</c> (veja a referência da API).</summary>
 public class GetMeResult : BzapperObject
 {
@@ -1997,6 +2170,54 @@ public class GetMeResultBfocus : BzapperObject
     [JsonPropertyName("user_hash")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? UserHash { get; set; }
+}
+
+/// <summary><c>GetOfficialMediaResult</c> (veja a referência da API).</summary>
+public class GetOfficialMediaResult : BzapperObject
+{
+    /// <summary><c>id</c></summary>
+    [JsonPropertyName("id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Id { get; set; }
+
+    /// <summary><c>mime_type</c></summary>
+    [JsonPropertyName("mime_type")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? MimeType { get; set; }
+
+    /// <summary><c>sha256</c></summary>
+    [JsonPropertyName("sha256")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Sha256 { get; set; }
+
+    /// <summary><c>file_size</c></summary>
+    [JsonPropertyName("file_size")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public long? FileSize { get; set; }
+}
+
+/// <summary><c>GetOfficialSignupConfigResult</c> (veja a referência da API).</summary>
+public class GetOfficialSignupConfigResult : BzapperObject
+{
+    /// <summary><c>enabled</c> — Obrigatório.</summary>
+    [JsonPropertyName("enabled")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Enabled { get; set; }
+
+    /// <summary><c>app_id</c> — Obrigatório.</summary>
+    [JsonPropertyName("app_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? AppId { get; set; }
+
+    /// <summary><c>config_id</c> — Obrigatório.</summary>
+    [JsonPropertyName("config_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ConfigId { get; set; }
+
+    /// <summary><c>graph_version</c> — Obrigatório.</summary>
+    [JsonPropertyName("graph_version")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? GraphVersion { get; set; }
 }
 
 /// <summary><c>GetProjectsHealthResult</c> (veja a referência da API).</summary>
@@ -2243,6 +2464,11 @@ public class Instance : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Status { get; set; }
 
+    /// <summary><c>rail</c> — Where the number comes from. `official` is a Meta number (mirror of the connected account): it has no QR, session or connection-age requirement, and its lifecycle is under /official/numbers.</summary>
+    [JsonPropertyName("rail")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Rail { get; set; }
+
     /// <summary><c>status_reason</c> — Reason for the last state transition (especially on drops).</summary>
     [JsonPropertyName("status_reason")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -2259,7 +2485,7 @@ public class Instance : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ProxyUrl { get; set; }
 
-    /// <summary><c>warming_started_at</c> — Start of the warm-up period (anti-ban ramp-up).</summary>
+    /// <summary><c>warming_started_at</c> — Start of the gradual send-limit ramp for a newly connected number.</summary>
     [JsonPropertyName("warming_started_at")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [JsonConverter(typeof(UtcDateTimeConverter))]
@@ -2523,6 +2749,15 @@ public class Label : BzapperObject
     public string? Color { get; set; }
 }
 
+/// <summary><c>ListAvailableOfficialNumbersResult</c> (veja a referência da API).</summary>
+public class ListAvailableOfficialNumbersResult : BzapperObject
+{
+    /// <summary><c>numbers</c></summary>
+    [JsonPropertyName("numbers")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<MetaPhoneNumber>? Numbers { get; set; }
+}
+
 /// <summary><c>ListCampaignRecipientsResult</c> (veja a referência da API).</summary>
 public class ListCampaignRecipientsResult : BzapperObject
 {
@@ -2559,6 +2794,15 @@ public class ListLabelsResult : BzapperObject
     public List<Label>? Data { get; set; }
 }
 
+/// <summary><c>ListMetaWebhookEventsResult</c> (veja a referência da API).</summary>
+public class ListMetaWebhookEventsResult : BzapperObject
+{
+    /// <summary><c>data</c></summary>
+    [JsonPropertyName("data")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<MetaWebhookEvent>? Data { get; set; }
+}
+
 /// <summary><c>ListMyInvoicesResult</c> (veja a referência da API).</summary>
 public class ListMyInvoicesResult : BzapperObject
 {
@@ -2566,6 +2810,15 @@ public class ListMyInvoicesResult : BzapperObject
     [JsonPropertyName("data")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<Invoice>? Data { get; set; }
+}
+
+/// <summary><c>ListOfficialNumbersResult</c> (veja a referência da API).</summary>
+public class ListOfficialNumbersResult : BzapperObject
+{
+    /// <summary><c>numbers</c></summary>
+    [JsonPropertyName("numbers")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<OfficialAccount>? Numbers { get; set; }
 }
 
 /// <summary><c>ListPartnerConnectionsResult</c> (veja a referência da API).</summary>
@@ -2628,6 +2881,15 @@ public class ListSection : BzapperObject
     public List<ListRow>? Rows { get; set; }
 }
 
+/// <summary><c>ListTemplatesResult</c> (veja a referência da API).</summary>
+public class ListTemplatesResult : BzapperObject
+{
+    /// <summary><c>templates</c></summary>
+    [JsonPropertyName("templates")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<Template>? Templates { get; set; }
+}
+
 /// <summary><c>ListUsersResult</c> (veja a referência da API).</summary>
 public class ListUsersResult : BzapperObject
 {
@@ -2670,9 +2932,14 @@ public class MarkReadRequest : BzapperObject
     public string? Sender { get; set; }
 }
 
-/// <summary>Media by URL **or** base64 (never both).</summary>
+/// <summary>Media by URL **or** base64 (never both) — or, on the official rail, by `id` (a file already uploaded with `uploadOfficialMedia`).</summary>
 public class MediaInput : BzapperObject
 {
+    /// <summary><c>id</c> — OFFICIAL RAIL ONLY. Id returned by `POST /official/media`: sends the stored file without uploading it again — ideal for the same image in a whole campaign. Valid for 30 days and only from the number that uploaded it. On the unofficial rail → `409 media_id_official_only`.</summary>
+    [JsonPropertyName("id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Id { get; set; }
+
     /// <summary><c>url</c></summary>
     [JsonPropertyName("url")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -2822,6 +3089,90 @@ public class MessageQueued : BzapperObject
     [JsonPropertyName("client_reference")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ClientReference { get; set; }
+
+    /// <summary><c>delivery</c> — Present ONLY when the platform took a path other than the one you asked for. Today that means one thing: the 24-hour window with the contact was closed, so the free text went out as the project fallback template instead. The platform decides, but it does not hide.</summary>
+    [JsonPropertyName("delivery")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public DeliveryInfo? Delivery { get; set; }
+}
+
+/// <summary>A number of the business account as Meta reports it.</summary>
+public class MetaPhoneNumber : BzapperObject
+{
+    /// <summary><c>id</c> — Meta's id of the number (phone_number_id).</summary>
+    [JsonPropertyName("id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Id { get; set; }
+
+    /// <summary><c>display_phone_number</c></summary>
+    [JsonPropertyName("display_phone_number")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? DisplayPhoneNumber { get; set; }
+
+    /// <summary><c>verified_name</c></summary>
+    [JsonPropertyName("verified_name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? VerifiedName { get; set; }
+
+    /// <summary><c>quality_rating</c></summary>
+    [JsonPropertyName("quality_rating")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? QualityRating { get; set; }
+
+    /// <summary><c>name_status</c> — Display name review: APPROVED, PENDING_REVIEW, REJECTED.</summary>
+    [JsonPropertyName("name_status")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? NameStatus { get; set; }
+
+    /// <summary><c>code_verification_status</c> — VERIFIED, NOT_VERIFIED or EXPIRED.</summary>
+    [JsonPropertyName("code_verification_status")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? CodeVerificationStatus { get; set; }
+
+    /// <summary><c>messaging_limit_tier</c></summary>
+    [JsonPropertyName("messaging_limit_tier")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? MessagingLimitTier { get; set; }
+}
+
+/// <summary>One event Meta delivered to bZapper, raw, with its processing state.</summary>
+public class MetaWebhookEvent : BzapperObject
+{
+    /// <summary><c>id</c> — Sequential id; pass it as `before` to page. Obrigatório.</summary>
+    [JsonPropertyName("id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public long? Id { get; set; }
+
+    /// <summary><c>received_at</c> — Obrigatório.</summary>
+    [JsonPropertyName("received_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? ReceivedAt { get; set; }
+
+    /// <summary><c>fields</c> — Meta change fields in the event, comma-separated (e.g. `messages`, `message_template_status_update`). Obrigatório.</summary>
+    [JsonPropertyName("fields")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Fields { get; set; }
+
+    /// <summary><c>status</c> — How bZapper processed it. Obrigatório.</summary>
+    [JsonPropertyName("status")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Status { get; set; }
+
+    /// <summary><c>attempts</c> — Obrigatório.</summary>
+    [JsonPropertyName("attempts")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Attempts { get; set; }
+
+    /// <summary><c>error</c> — Last processing error, when there was one.</summary>
+    [JsonPropertyName("error")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Error { get; set; }
+
+    /// <summary><c>body</c> — The payload exactly as Meta sent it. Obrigatório.</summary>
+    [JsonPropertyName("body")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public JsonElement? Body { get; set; }
 }
 
 /// <summary><c>NumberEligibility</c> (veja a referência da API).</summary>
@@ -2847,7 +3198,7 @@ public class NumberEligibility : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Status { get; set; }
 
-    /// <summary><c>connected_days</c> — Days since the number was created (age used for warm-up).</summary>
+    /// <summary><c>connected_days</c> — Days since the number was created (age used by the campaign policy).</summary>
     [JsonPropertyName("connected_days")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? ConnectedDays { get; set; }
@@ -2887,10 +3238,10 @@ public class OfferCallRequest : BzapperObject
     public bool? Video { get; set; }
 }
 
-/// <summary>WhatsApp Business (Cloud API) account connected to a project. The access token is never serialized.</summary>
+/// <summary>A WhatsApp Business Account connected to a project. The access token never comes back.</summary>
 public class OfficialAccount : BzapperObject
 {
-    /// <summary><c>id</c></summary>
+    /// <summary><c>id</c> — Obrigatório.</summary>
     [JsonPropertyName("id")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Id { get; set; }
@@ -2905,12 +3256,12 @@ public class OfficialAccount : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ProjectId { get; set; }
 
-    /// <summary><c>waba_id</c></summary>
+    /// <summary><c>waba_id</c> — Obrigatório.</summary>
     [JsonPropertyName("waba_id")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? WabaId { get; set; }
 
-    /// <summary><c>phone_number_id</c></summary>
+    /// <summary><c>phone_number_id</c> — Obrigatório.</summary>
     [JsonPropertyName("phone_number_id")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? PhoneNumberId { get; set; }
@@ -2925,6 +3276,85 @@ public class OfficialAccount : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? VerifiedName { get; set; }
 
+    /// <summary><c>status</c> — `AGUARDANDO_PAGAMENTO` is the one onboarding step Meta does not expose over the API: the customer must attach a payment method to the WABA before it can send. Obrigatório.</summary>
+    [JsonPropertyName("status")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Status { get; set; }
+
+    /// <summary><c>status_reason</c></summary>
+    [JsonPropertyName("status_reason")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? StatusReason { get; set; }
+
+    /// <summary><c>quality_rating</c> — Quality and volume limit as reported by Meta over the webhook.</summary>
+    [JsonPropertyName("quality_rating")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? QualityRating { get; set; }
+
+    /// <summary><c>messaging_limit</c></summary>
+    [JsonPropertyName("messaging_limit")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? MessagingLimit { get; set; }
+
+    /// <summary><c>source</c> — `embedded_signup` is the normal path; `manual` is pasted credentials (support fallback). Obrigatório.</summary>
+    [JsonPropertyName("source")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Source { get; set; }
+
+    /// <summary><c>is_default</c> — This number sends when the request does not pick one.</summary>
+    [JsonPropertyName("is_default")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? IsDefault { get; set; }
+
+    /// <summary><c>instance_id</c> — The number's instance — the same value you pass as `instance_id` in a send to choose which number the message goes out from.</summary>
+    [JsonPropertyName("instance_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? InstanceId { get; set; }
+}
+
+/// <summary>A file stored at Meta, reusable as `media.id` in sends from the same number.</summary>
+public class OfficialMedia : BzapperObject
+{
+    /// <summary><c>id</c> — Pass it as `media.id` in a media send. Obrigatório.</summary>
+    [JsonPropertyName("id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Id { get; set; }
+
+    /// <summary><c>type</c> — Obrigatório.</summary>
+    [JsonPropertyName("type")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Type { get; set; }
+
+    /// <summary><c>mime_type</c> — Obrigatório.</summary>
+    [JsonPropertyName("mime_type")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? MimeType { get; set; }
+
+    /// <summary><c>file_size</c> — Obrigatório.</summary>
+    [JsonPropertyName("file_size")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public long? FileSize { get; set; }
+
+    /// <summary><c>instance_id</c> — The number that uploaded it — sends must come from it. Obrigatório.</summary>
+    [JsonPropertyName("instance_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? InstanceId { get; set; }
+
+    /// <summary><c>expires_at</c> — Meta keeps the file for 30 days. Obrigatório.</summary>
+    [JsonPropertyName("expires_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? ExpiresAt { get; set; }
+}
+
+/// <summary>What is ready and what is missing for this project to send on the official rail.</summary>
+public class OfficialReadiness : BzapperObject
+{
+    /// <summary><c>connected</c> — Obrigatório.</summary>
+    [JsonPropertyName("connected")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Connected { get; set; }
+
     /// <summary><c>status</c></summary>
     [JsonPropertyName("status")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -2934,6 +3364,31 @@ public class OfficialAccount : BzapperObject
     [JsonPropertyName("status_reason")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? StatusReason { get; set; }
+
+    /// <summary><c>display_number</c></summary>
+    [JsonPropertyName("display_number")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? DisplayNumber { get; set; }
+
+    /// <summary><c>verified_name</c></summary>
+    [JsonPropertyName("verified_name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? VerifiedName { get; set; }
+
+    /// <summary><c>number_verified</c> — The number completed SMS/call verification. Obrigatório.</summary>
+    [JsonPropertyName("number_verified")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? NumberVerified { get; set; }
+
+    /// <summary><c>name_status</c> — Display-name review (APPROVED, PENDING_REVIEW, REJECTED). Rejection does not block sending — the number shows instead of the name.</summary>
+    [JsonPropertyName("name_status")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? NameStatus { get; set; }
+
+    /// <summary><c>business_review</c> — Business verification (APPROVED, PENDING). What unlocks higher volume tiers.</summary>
+    [JsonPropertyName("business_review")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? BusinessReview { get; set; }
 
     /// <summary><c>quality_rating</c></summary>
     [JsonPropertyName("quality_rating")]
@@ -2945,10 +3400,20 @@ public class OfficialAccount : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? MessagingLimit { get; set; }
 
-    /// <summary><c>source</c></summary>
-    [JsonPropertyName("source")]
+    /// <summary><c>can_send</c> — The only question that matters to the customer — can this project send right now? Obrigatório.</summary>
+    [JsonPropertyName("can_send")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Source { get; set; }
+    public bool? CanSend { get; set; }
+
+    /// <summary><c>live</c> — False means Meta was unreachable and the values above are the last known ones. Obrigatório.</summary>
+    [JsonPropertyName("live")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Live { get; set; }
+
+    /// <summary><c>problem</c> — `invalid_token` (reconnect required) or `meta_unavailable`.</summary>
+    [JsonPropertyName("problem")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Problem { get; set; }
 }
 
 /// <summary><c>Partner</c> (veja a referência da API).</summary>
@@ -3027,6 +3492,12 @@ public class PartnerConnection : BzapperObject
     [JsonPropertyName("customer")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public ConnectCustomer? Customer { get; set; }
+
+    /// <summary><c>standalone_at</c> — When the customer converted this account to general use. Absent means the account is still managed by the partner and cannot issue its own API keys.</summary>
+    [JsonPropertyName("standalone_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? StandaloneAt { get; set; }
 
     /// <summary><c>numbers</c> — Only in GET /partner/connections and /partner/connections/{id}.</summary>
     [JsonPropertyName("numbers")]
@@ -3628,7 +4099,7 @@ public class SendLocation : SendBase
 /// <summary><c>SendMedia</c> (veja a referência da API).</summary>
 public class SendMedia : SendBase
 {
-    /// <summary><c>media</c> — Media by URL **or** base64 (never both). Obrigatório.</summary>
+    /// <summary><c>media</c> — Media by URL **or** base64 (never both) — or, on the official rail, by `id` (a file already uploaded with `uploadOfficialMedia`). Obrigatório.</summary>
     [JsonPropertyName("media")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public MediaInput? Media { get; set; }
@@ -3681,6 +4152,40 @@ public class SendReaction : SendBase
     public string? Emoji { get; set; }
 }
 
+/// <summary><c>SendTemplate</c> (veja a referência da API).</summary>
+public class SendTemplate : SendBase
+{
+    /// <summary><c>template</c> — Template NAME. The id Meta assigned to it never appears here. Obrigatório.</summary>
+    [JsonPropertyName("template")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Template { get; set; }
+
+    /// <summary><c>language</c> — e.g. pt_BR. May be omitted when the name exists in a single language; if it exists in more than one, the answer is 409 template_ambiguous.</summary>
+    [JsonPropertyName("language")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Language { get; set; }
+
+    /// <summary><c>variables</c> — Body values, in order ({{1}}, {{2}}, …). The count must match the approved template exactly — a mismatch is the number one cause of Meta error 132000.</summary>
+    [JsonPropertyName("variables")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Variables { get; set; }
+
+    /// <summary><c>header_variables</c> — Text header: the value of its variable. Image, video or document header: the media URL for THIS send in the first position — omitted, the sample media registered when the template was created goes out (Meta requires the media on every send).</summary>
+    [JsonPropertyName("header_variables")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? HeaderVariables { get; set; }
+
+    /// <summary><c>button_variables</c> — Values for dynamic URL buttons, by button index. Empty entries are skipped.</summary>
+    [JsonPropertyName("button_variables")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? ButtonVariables { get; set; }
+
+    /// <summary><c>code</c> — AUTHENTICATION templates only. Meta requires the code both in the body and in the copy-code button; we place it in both.</summary>
+    [JsonPropertyName("code")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Code { get; set; }
+}
+
 /// <summary><c>SendText</c> (veja a referência da API).</summary>
 public class SendText : SendBase
 {
@@ -3688,6 +4193,15 @@ public class SendText : SendBase
     [JsonPropertyName("body")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Body { get; set; }
+}
+
+/// <summary><c>SetFallbackTemplateRequest</c> (veja a referência da API).</summary>
+public class SetFallbackTemplateRequest : BzapperObject
+{
+    /// <summary><c>template_id</c> — Empty clears the fallback.</summary>
+    [JsonPropertyName("template_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? TemplateId { get; set; }
 }
 
 /// <summary><c>SetPrivacyRequest</c> (veja a referência da API).</summary>
@@ -3802,6 +4316,15 @@ public class SuppressionList : BzapperObject
     public List<Suppression>? Data { get; set; }
 }
 
+/// <summary><c>SyncTemplatesResult</c> (veja a referência da API).</summary>
+public class SyncTemplatesResult : BzapperObject
+{
+    /// <summary><c>imported</c></summary>
+    [JsonPropertyName("imported")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Imported { get; set; }
+}
+
 /// <summary>Entry in a dictionary (tag or contact group).</summary>
 public class Taxon : BzapperObject
 {
@@ -3872,6 +4395,183 @@ public class TaxonRef : BzapperObject
     [JsonPropertyName("key")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Key { get; set; }
+}
+
+/// <summary>A template as bZapper holds it. Meta owns the truth about `status`; this is our copy.</summary>
+public class Template : BzapperObject
+{
+    /// <summary><c>id</c></summary>
+    [JsonPropertyName("id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Id { get; set; }
+
+    /// <summary><c>project_id</c></summary>
+    [JsonPropertyName("project_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ProjectId { get; set; }
+
+    /// <summary><c>name</c></summary>
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; set; }
+
+    /// <summary><c>language</c></summary>
+    [JsonPropertyName("language")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Language { get; set; }
+
+    /// <summary><c>category</c></summary>
+    [JsonPropertyName("category")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Category { get; set; }
+
+    /// <summary><c>status</c> — The decision is asynchronous and can take up to 24 hours. It arrives through the template.approved / template.rejected webhooks — you do not have to poll for it.</summary>
+    [JsonPropertyName("status")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Status { get; set; }
+
+    /// <summary><c>rejected_reason</c> — What Meta said when it refused.</summary>
+    [JsonPropertyName("rejected_reason")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? RejectedReason { get; set; }
+
+    /// <summary><c>quality</c> — RED means Meta is about to pause it on its own.</summary>
+    [JsonPropertyName("quality")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Quality { get; set; }
+
+    /// <summary><c>variables</c> — How many values the body expects, and therefore how many you must send.</summary>
+    [JsonPropertyName("variables")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Variables { get; set; }
+
+    /// <summary><c>spec</c> — The simple shape you fill in. We turn it into Meta's component array — the nesting, the example format and the unwritten rules are ours to deal with, not yours.</summary>
+    [JsonPropertyName("spec")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public TemplateSpec? Spec { get; set; }
+
+    /// <summary><c>created_at</c></summary>
+    [JsonPropertyName("created_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? CreatedAt { get; set; }
+
+    /// <summary><c>updated_at</c></summary>
+    [JsonPropertyName("updated_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? UpdatedAt { get; set; }
+}
+
+/// <summary><c>TemplateBody</c> (veja a referência da API).</summary>
+public class TemplateBody : BzapperObject
+{
+    /// <summary><c>text</c> — Use {{1}}, {{2}}… for the values that change, numbered from 1 with no gaps. It cannot start or end with a variable, and two variables cannot sit side by side — Meta rejects all three, and we check before submitting. Obrigatório.</summary>
+    [JsonPropertyName("text")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Text { get; set; }
+
+    /// <summary><c>example</c> — One sample value per variable, in order. The most common reason for rejection is omitting these.</summary>
+    [JsonPropertyName("example")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Example { get; set; }
+}
+
+/// <summary><c>TemplateButton</c> (veja a referência da API).</summary>
+public class TemplateButton : BzapperObject
+{
+    /// <summary><c>type</c> — Obrigatório.</summary>
+    [JsonPropertyName("type")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Type { get; set; }
+
+    /// <summary><c>text</c> — Obrigatório.</summary>
+    [JsonPropertyName("text")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Text { get; set; }
+
+    /// <summary><c>url</c> — url buttons only. Up to 2 per template. May carry a {{1}} at the end.</summary>
+    [JsonPropertyName("url")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Url { get; set; }
+
+    /// <summary><c>phone</c> — phone_number buttons only. At most 1 per template.</summary>
+    [JsonPropertyName("phone")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Phone { get; set; }
+
+    /// <summary><c>example</c> — Filled-in sample URL, required when the url carries a variable.</summary>
+    [JsonPropertyName("example")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Example { get; set; }
+}
+
+/// <summary><c>TemplateHeader</c> (veja a referência da API).</summary>
+public class TemplateHeader : BzapperObject
+{
+    /// <summary><c>type</c> — Obrigatório.</summary>
+    [JsonPropertyName("type")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Type { get; set; }
+
+    /// <summary><c>text</c> — Text header, up to 60 characters, at most ONE variable.</summary>
+    [JsonPropertyName("text")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Text { get; set; }
+
+    /// <summary><c>example</c> — Sample value for the header variable. Meta rejects a variable with no example.</summary>
+    [JsonPropertyName("example")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Example { get; set; }
+
+    /// <summary><c>media_url</c> — Media header only — a public URL to the SAMPLE file. We fetch it and upload it to Meta, which wants to see the format before approving.</summary>
+    [JsonPropertyName("media_url")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? MediaUrl { get; set; }
+}
+
+/// <summary>The simple shape you fill in. We turn it into Meta's component array — the nesting, the example format and the unwritten rules are ours to deal with, not yours.</summary>
+public class TemplateSpec : BzapperObject
+{
+    /// <summary><c>name</c> — Lowercase letters, numbers and _. This is the name you send by. Obrigatório.</summary>
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; set; }
+
+    /// <summary><c>language</c> — e.g. pt_BR. Both pt-BR and pt_BR are accepted. Obrigatório.</summary>
+    [JsonPropertyName("language")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Language { get; set; }
+
+    /// <summary><c>category</c> — Decides what the conversation COSTS and what Meta accepts in the content — not an administrative label. UTILITY is cheaper but only covers what the customer already expects; promotional wording in it gets reclassified, and the price changes with it. Obrigatório.</summary>
+    [JsonPropertyName("category")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Category { get; set; }
+
+    /// <summary><c>header</c></summary>
+    [JsonPropertyName("header")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public TemplateHeader? Header { get; set; }
+
+    /// <summary><c>body</c> — Obrigatório.</summary>
+    [JsonPropertyName("body")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public TemplateBody? Body { get; set; }
+
+    /// <summary><c>footer</c> — Up to 60 characters. Accepts no variables.</summary>
+    [JsonPropertyName("footer")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Footer { get; set; }
+
+    /// <summary><c>buttons</c></summary>
+    [JsonPropertyName("buttons")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<TemplateButton>? Buttons { get; set; }
+
+    /// <summary><c>code_expiry_minutes</c> — AUTHENTICATION only, 1 to 90. In that category Meta writes the text itself and adds the copy-code button; this is the only thing you set.</summary>
+    [JsonPropertyName("code_expiry_minutes")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? CodeExpiryMinutes { get; set; }
 }
 
 /// <summary><c>TestWebhookRequest</c> (veja a referência da API).</summary>
@@ -4131,6 +4831,15 @@ public class UploadProjectLogoResult : BzapperObject
     [JsonPropertyName("logo_url")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? LogoUrl { get; set; }
+}
+
+/// <summary><c>UploadTemplateMediaResult</c> (veja a referência da API).</summary>
+public class UploadTemplateMediaResult : BzapperObject
+{
+    /// <summary><c>url</c> — Obrigatório.</summary>
+    [JsonPropertyName("url")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Url { get; set; }
 }
 
 /// <summary><c>UsageSummary</c> (veja a referência da API).</summary>
@@ -4418,6 +5127,40 @@ public class WebhookList : BzapperObject
     [JsonPropertyName("data")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<Webhook>? Data { get; set; }
+}
+
+/// <summary><c>WebhookRedelivery</c> (veja a referência da API).</summary>
+public class WebhookRedelivery : BzapperObject
+{
+    /// <summary><c>delivery_id</c> — Obrigatório.</summary>
+    [JsonPropertyName("delivery_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? DeliveryId { get; set; }
+
+    /// <summary><c>event_id</c> — Obrigatório.</summary>
+    [JsonPropertyName("event_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? EventId { get; set; }
+
+    /// <summary><c>event_type</c> — Obrigatório.</summary>
+    [JsonPropertyName("event_type")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? EventType { get; set; }
+
+    /// <summary><c>status</c> — HTTP status your endpoint answered (0 on transport failure). Obrigatório.</summary>
+    [JsonPropertyName("status")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Status { get; set; }
+
+    /// <summary><c>delivered</c> — Obrigatório.</summary>
+    [JsonPropertyName("delivered")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Delivered { get; set; }
+
+    /// <summary><c>error</c></summary>
+    [JsonPropertyName("error")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Error { get; set; }
 }
 
 /// <summary>Valores conhecidos de <c>AddonKind</c> — Quantity add-ons: number, project, storage_gb, retention_block (+30 days). Feature toggles (0/1): campaigns, schedule_year.. A API pode ganhar valores novos: trate o campo como <c>string</c>.</summary>

@@ -1048,8 +1048,8 @@ public sealed partial class BzapperClient
         return Http.SendAsync<GetCampaignResult>(HttpMethod.Get, path, null, null, options, cancellationToken);
     }
 
-    /// <summary>Per-number campaign eligibility (connection + warm-up) — <c>GET /campaigns/eligibility</c>.</summary>
-    /// <remarks>Same engine the dispatcher uses: which numbers can send campaigns now, the account's anti-ban policy (warm-up days, minimum numbers) and whether a campaign can be started.</remarks>
+    /// <summary>Per-number campaign eligibility (connection and age) — <c>GET /campaigns/eligibility</c>.</summary>
+    /// <remarks>Same engine the dispatcher uses: which numbers can send campaigns now, the account's campaign policy (minimum connection age, minimum numbers) and whether a campaign can be started.</remarks>
     /// <param name="poolId"><c>pool_id</c> (query). Restrict to a pool.</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -1193,6 +1193,19 @@ public sealed partial class BzapperClient
     }
 
     // ── connect ─────────────────────────────────────────────────────────────────────────────────────────────
+
+    /// <summary>Convert a partner-created account to general use (admin). The connection stays: the partner keeps working and any partnership discount keeps applying. What changes is that the account may issue its own API keys. Irreversible. — <c>POST /me/connections/{id}/standalone</c>.</summary>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Connected partner app (connection) ID (UUID).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="PartnerConnection"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<PartnerConnection> ConvertConnectedAppToStandaloneAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/me/connections/" + PathSegment.Encode(id, "id") + "/standalone";
+        return Http.SendAsync<PartnerConnection>(HttpMethod.Post, path, null, null, options, cancellationToken);
+    }
 
     /// <summary>Connected apps — partner software using this account's WhatsApp — <c>GET /me/connections</c>.</summary>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
@@ -1894,21 +1907,6 @@ public sealed partial class BzapperClient
         return Http.SendAsync<ConnectResult>(HttpMethod.Post, path, query, null, options, cancellationToken);
     }
 
-    /// <summary>Connect a WhatsApp Business account to the project (manual credentials) — <c>POST /official/account</c>.</summary>
-    /// <remarks>Manual connection with credentials (support fallback for the Embedded Signup). The access token is stored encrypted and never returned.</remarks>
-    /// <param name="request">Corpo da requisição (<see cref="ConnectOfficialAccountRequest"/>).</param>
-    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
-    /// <param name="cancellationToken">Cancelamento.</param>
-    /// <returns>O objeto <see cref="OfficialAccount"/> devolvido pela API.</returns>
-    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
-    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
-    public Task<OfficialAccount> ConnectOfficialAccountAsync(ConnectOfficialAccountRequest request, RequestOptions? options = null, CancellationToken cancellationToken = default)
-    {
-        var path = "/official/account";
-        if (request is null) throw new ArgumentNullException(nameof(request));
-        return Http.SendAsync<OfficialAccount>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
-    }
-
     /// <summary>Create an instance (number) — <c>POST /instances</c>.</summary>
     /// <param name="request">Corpo da requisição (<see cref="CreateInstance"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
@@ -1950,18 +1948,6 @@ public sealed partial class BzapperClient
         return Http.SendVoidAsync(HttpMethod.Post, path, null, null, options, cancellationToken);
     }
 
-    /// <summary>Disconnect the project's WhatsApp Business account — <c>DELETE /official/account</c>.</summary>
-    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
-    /// <param name="cancellationToken">Cancelamento.</param>
-    /// <returns>Nada (a API responde sem corpo).</returns>
-    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
-    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
-    public Task DisconnectOfficialAccountAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
-    {
-        var path = "/official/account";
-        return Http.SendVoidAsync(HttpMethod.Delete, path, null, null, options, cancellationToken);
-    }
-
     /// <summary>Get an instance — <c>GET /instances/{id}</c>.</summary>
     /// <param name="id"><c>id</c> (caminho). Obrigatório. Instance ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
@@ -1973,18 +1959,6 @@ public sealed partial class BzapperClient
     {
         var path = "/instances/" + PathSegment.Encode(id, "id");
         return Http.SendAsync<Instance>(HttpMethod.Get, path, null, null, options, cancellationToken);
-    }
-
-    /// <summary>The WhatsApp Business (Cloud API) account connected to the project — <c>GET /official/account</c>.</summary>
-    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
-    /// <param name="cancellationToken">Cancelamento.</param>
-    /// <returns>O objeto <see cref="OfficialAccount"/> devolvido pela API.</returns>
-    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
-    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
-    public Task<OfficialAccount> GetOfficialAccountAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
-    {
-        var path = "/official/account";
-        return Http.SendAsync<OfficialAccount>(HttpMethod.Get, path, null, null, options, cancellationToken);
     }
 
     /// <summary>List the tenant's instances (numbers) — <c>GET /instances</c>.</summary>
@@ -2245,6 +2219,21 @@ public sealed partial class BzapperClient
         return Http.SendAsync<MessageQueued>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
     }
 
+    /// <summary>Send an approved template by name — <c>POST /messages/template</c>.</summary>
+    /// <remarks>The ONLY way to start a conversation outside the 24-hour service window. You pass the template NAME and the values; the id Meta assigned to it never appears. `language` may be omitted when the name exists in a single language — asking for it when there is no ambiguity would be paperwork. If the name exists in more than one, the answer is 409 `template_ambiguous`, because picking the wrong language for someone is worse than asking. The number of `variables` must match the approved body exactly. We check that here rather than spending the call: a mismatch is the number one cause of Meta error 132000. For an AUTHENTICATION template, send the code in `code` — Meta requires it both in the body and in the copy-code button, and we place it in both.</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="SendTemplate"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="MessageQueued"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<MessageQueued> SendTemplateAsync(SendTemplate request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/messages/template";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<MessageQueued>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
     /// <summary>Send a text message — <c>POST /messages/text</c>.</summary>
     /// <param name="request">Corpo da requisição (<see cref="SendText"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
@@ -2271,6 +2260,336 @@ public sealed partial class BzapperClient
         var path = "/messages/video";
         if (request is null) throw new ArgumentNullException(nameof(request));
         return Http.SendAsync<MessageQueued>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
+    // ── official ────────────────────────────────────────────────────────────────────────────────────────────
+
+    /// <summary>Connect one more number from the same business account — <c>POST /official/numbers</c>.</summary>
+    /// <remarks>Reuses the authorization already stored — it belongs to the account, not to the number — so nothing has to be authorized again. Pick the id from GET /official/numbers/available. The number is checked against Meta before it is saved, so a wrong id fails here and not on the first send.</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="AddOfficialNumberRequest"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="OfficialAccount"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<OfficialAccount> AddOfficialNumberAsync(AddOfficialNumberRequest request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/numbers";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<OfficialAccount>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
+    /// <summary>Finish the connection with the code returned by Meta's popup — <c>POST /official/embedded-signup</c>.</summary>
+    /// <remarks>Exchanges the one-time `code` for a lasting token, subscribes the app to the WABA's webhooks and registers the number on the Cloud API. The customer never sees or types a credential. The code expires about 30 seconds after the popup closes, so send it straight through. A non-fatal step that fails comes back in `warning` instead of losing the whole connection: the account is stored either way and the UI offers a retry.</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="CompleteOfficialSignupRequest"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="CompleteOfficialSignupResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<CompleteOfficialSignupResult> CompleteOfficialSignupAsync(CompleteOfficialSignupRequest request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/embedded-signup";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<CompleteOfficialSignupResult>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
+    /// <summary>Connect (or reconnect) a WhatsApp Business Account to the project — <c>POST /official/account</c>.</summary>
+    /// <remarks>Stores the customer's Meta credentials for the project. Calling it again replaces them — that is the reconnection path when a token is revoked, and it never creates a second account for the same project. `phone_number_id` is optional: when omitted, the number is discovered from the WABA. If the WABA holds more than one number the call returns 409 with the list, so the choice stays with the account owner instead of being guessed.</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="ConnectOfficialAccountRequest"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="OfficialAccount"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<OfficialAccount> ConnectOfficialAccountAsync(ConnectOfficialAccountRequest request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/account";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<OfficialAccount>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
+    /// <summary>Delete a media file from Meta before it expires — <c>DELETE /official/media/{media_id}</c>.</summary>
+    /// <param name="mediaId"><c>media_id</c> (caminho). Obrigatório.</param>
+    /// <param name="instanceId"><c>instance_id</c> (query). Number that uploaded it. Default: the project default.</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>Nada (a API responde sem corpo).</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task DeleteOfficialMediaAsync(string mediaId, string? instanceId = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/media/" + PathSegment.Encode(mediaId, "media_id");
+        var query = new Query().Add("instance_id", instanceId);
+        return Http.SendVoidAsync(HttpMethod.Delete, path, query, null, options, cancellationToken);
+    }
+
+    /// <summary>Disconnect the account from the project — <c>DELETE /official/account</c>.</summary>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>Nada (a API responde sem corpo).</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task DisconnectOfficialAccountAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/account";
+        return Http.SendVoidAsync(HttpMethod.Delete, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Disconnect one number — <c>DELETE /official/numbers/{id}</c>.</summary>
+    /// <remarks>The conversation history stays: the mirror instance is archived, not deleted. Removing the default promotes the oldest of the remaining numbers, so the project never ends up with numbers and no default.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>Nada (a API responde sem corpo).</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task DisconnectOfficialNumberAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/numbers/" + PathSegment.Encode(id, "id");
+        return Http.SendVoidAsync(HttpMethod.Delete, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Read the WhatsApp Business Account connected to the project — <c>GET /official/account</c>.</summary>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="OfficialAccount"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<OfficialAccount> GetOfficialAccountAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/account";
+        return Http.SendAsync<OfficialAccount>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Check that a media id is still valid — <c>GET /official/media/{media_id}</c>.</summary>
+    /// <remarks>Returns what Meta knows about the file (type, size, sha256). Meta's download URL is not returned: it only opens with the account token, which never leaves bZapper.</remarks>
+    /// <param name="mediaId"><c>media_id</c> (caminho). Obrigatório.</param>
+    /// <param name="instanceId"><c>instance_id</c> (query). Number that uploaded it. Default: the project default.</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="GetOfficialMediaResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<GetOfficialMediaResult> GetOfficialMediaAsync(string mediaId, string? instanceId = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/media/" + PathSegment.Encode(mediaId, "media_id");
+        var query = new Query().Add("instance_id", instanceId);
+        return Http.SendAsync<GetOfficialMediaResult>(HttpMethod.Get, path, query, null, options, cancellationToken);
+    }
+
+    /// <summary>Read the business profile of the number given in the path — <c>GET /official/numbers/{id}/profile</c>.</summary>
+    /// <remarks>The business profile is what the end customer sees when opening the chat: short "about" line, description, address, e-mail, sector and up to two websites. It lives on the NUMBER, not on the account — with several numbers, each has its own.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Connected number id (`id` from GET /official/numbers).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="BusinessProfile"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<BusinessProfile> GetOfficialNumberProfileAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/numbers/" + PathSegment.Encode(id, "id") + "/profile";
+        return Http.SendAsync<BusinessProfile>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Read the business profile of the project's default number — <c>GET /official/profile</c>.</summary>
+    /// <remarks>The business profile is what the end customer sees when opening the chat: short "about" line, description, address, e-mail, sector and up to two websites. It lives on the NUMBER, not on the account — with several numbers, each has its own.</remarks>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="BusinessProfile"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<BusinessProfile> GetOfficialProfileAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/profile";
+        return Http.SendAsync<BusinessProfile>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Read what the browser needs to open Meta's Embedded Signup — <c>GET /official/signup-config</c>.</summary>
+    /// <remarks>Returns the app and configuration ids the Meta JS SDK needs. Both are public by nature — the customer's browser sees them. The app secret never leaves the server: the one-time `code` the popup returns is exchanged for a token server-side. `enabled` false means this installation has no Embedded Signup configured, and the UI should offer the manual path instead of a button that cannot work.</remarks>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="GetOfficialSignupConfigResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<GetOfficialSignupConfigResult> GetOfficialSignupConfigAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/signup-config";
+        return Http.SendAsync<GetOfficialSignupConfigResult>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>What is ready and what is missing, checked live against Meta — <c>GET /official/status</c>.</summary>
+    /// <remarks>Joins what we store with what Meta reports right now: whether the number is verified, whether the display name and the business passed review, quality and volume tier. `live` false means Meta could not be reached and the values are the last known ones — the difference between "this is how it is" and "we could not check" matters to the caller.</remarks>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="OfficialReadiness"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<OfficialReadiness> GetOfficialStatusAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/status";
+        return Http.SendAsync<OfficialReadiness>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>List the account's numbers that are not connected to the project yet — <c>GET /official/numbers/available</c>.</summary>
+    /// <remarks>What feeds "add a number": the numbers the business account holds on Meta, minus the ones already connected here — without opening Meta's dashboard.</remarks>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="ListAvailableOfficialNumbersResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<ListAvailableOfficialNumbersResult> ListAvailableOfficialNumbersAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/numbers/available";
+        return Http.SendAsync<ListAvailableOfficialNumbersResult>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>List the raw events Meta sent for the project's accounts — <c>GET /official/webhook-events</c>.</summary>
+    /// <remarks>The "Meta → bZapper" side of webhooks: each event Meta delivered for the project's business accounts, exactly as Meta signed it, with how bZapper processed it (`pending`, `running`, `done` or `failed`, attempts and the last error). Together with the webhook deliveries (`listWebhookDeliveries`), it shows the whole chain — and, when an event does not reach your system, on which side it stopped. Newest first; pass the last `id` as `before` to page back. Events are kept for 3 days after being applied, 30 when they failed. Requires the `webhooks:manage` scope.</remarks>
+    /// <param name="limit"><c>limit</c> (query). 1–200 (default 50).</param>
+    /// <param name="before"><c>before</c> (query). Return only events older than this id (pagination).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="ListMetaWebhookEventsResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<ListMetaWebhookEventsResult> ListMetaWebhookEventsAsync(int? limit = null, long? before = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/webhook-events";
+        var query = new Query().Add("limit", limit).Add("before", before);
+        return Http.SendAsync<ListMetaWebhookEventsResult>(HttpMethod.Get, path, query, null, options, cancellationToken);
+    }
+
+    /// <summary>List the numbers connected to the project — <c>GET /official/numbers</c>.</summary>
+    /// <remarks>Meta allows several numbers on one business account. Each connected number has an `instance_id` — the same value you pass in a send to choose which number it goes out from, exactly as on the unofficial rail. The one flagged `is_default` sends when the request does not pick one.</remarks>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="ListOfficialNumbersResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<ListOfficialNumbersResult> ListOfficialNumbersAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/numbers";
+        return Http.SendAsync<ListOfficialNumbersResult>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Re-register the number given in the path on the Cloud API — <c>POST /official/numbers/{id}/profile/reregister</c>.</summary>
+    /// <remarks>The step people forget after Meta approves a new display name: until the number is re-registered it keeps showing the old name. Requesting the name change itself is not an API call (it is done in WhatsApp Manager); this is the half that is. Already registered counts as success.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Connected number id (`id` from GET /official/numbers).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>Nada (a API responde sem corpo).</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task ReregisterOfficialNumberProfileAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/numbers/" + PathSegment.Encode(id, "id") + "/profile/reregister";
+        return Http.SendVoidAsync(HttpMethod.Post, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Re-register the project's default number on the Cloud API — <c>POST /official/profile/reregister</c>.</summary>
+    /// <remarks>The step people forget after Meta approves a new display name: until the number is re-registered it keeps showing the old name. Requesting the name change itself is not an API call (it is done in WhatsApp Manager); this is the half that is. Already registered counts as success.</remarks>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>Nada (a API responde sem corpo).</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task ReregisterOfficialProfileAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/profile/reregister";
+        return Http.SendVoidAsync(HttpMethod.Post, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Choose the number that sends when the request does not pick one — <c>PUT /official/numbers/{id}/default</c>.</summary>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>Nada (a API responde sem corpo).</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task SetDefaultOfficialNumberAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/numbers/" + PathSegment.Encode(id, "id") + "/default";
+        return Http.SendVoidAsync(HttpMethod.Put, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Update the business profile of the number given in the path — <c>PUT /official/numbers/{id}/profile</c>.</summary>
+    /// <remarks>Validated against Meta's published limits BEFORE sending (about 139 characters, description 512, address 256, at most 2 websites, a closed list of sectors), so a refusal names the field and by how much it overflowed instead of Meta's generic "Invalid parameter". Send the WHOLE profile: an empty field is not "unchanged", it clears that field on Meta. Read it first with GET and send it back with your edits.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Connected number id (`id` from GET /official/numbers).</param>
+    /// <param name="request">Corpo da requisição (<see cref="BusinessProfile"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="BusinessProfile"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<BusinessProfile> UpdateOfficialNumberProfileAsync(string id, BusinessProfile request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/numbers/" + PathSegment.Encode(id, "id") + "/profile";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<BusinessProfile>(HttpMethod.Put, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
+    /// <summary>Update the business profile of the project's default number — <c>PUT /official/profile</c>.</summary>
+    /// <remarks>Validated against Meta's published limits BEFORE sending (about 139 characters, description 512, address 256, at most 2 websites, a closed list of sectors), so a refusal names the field and by how much it overflowed instead of Meta's generic "Invalid parameter". Send the WHOLE profile: an empty field is not "unchanged", it clears that field on Meta. Read it first with GET and send it back with your edits.</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="BusinessProfile"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="BusinessProfile"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<BusinessProfile> UpdateOfficialProfileAsync(BusinessProfile request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/profile";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<BusinessProfile>(HttpMethod.Put, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
+    /// <summary>Upload a file to Meta once and reuse it in many sends (multipart) — <c>POST /official/media</c>.</summary>
+    /// <remarks>Uploads the file to Meta through the project's default number (or `instance_id`) and returns its `id`. Send it as `media.id` in any media send — Meta does not download the file again for each message, which is what you want for the same image in a whole campaign. The id is valid for 30 days and only for sends from the number that uploaded it. Accepted (Meta's limits): image JPEG/PNG up to 5 MB, sticker WebP up to 500 KB, video MP4/3GP and audio AAC/AMR/MP3/MP4/OGG up to 16 MB, document PDF/Office/text up to 64 MB.</remarks>
+    /// <param name="file">Arquivo enviado como <c>multipart/form-data</c> (campo <c>file</c>).</param>
+    /// <param name="instanceId"><c>instance_id</c> (query). Number that uploads (and may send) it. Default: the project default.</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="OfficialMedia"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<OfficialMedia> UploadOfficialMediaAsync(FileUpload file, string? instanceId = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/media";
+        if (file is null) throw new ArgumentNullException(nameof(file));
+        var query = new Query().Add("instance_id", instanceId);
+        return Http.SendAsync<OfficialMedia>(HttpMethod.Post, path, query, RequestBody.Multipart(file), options, cancellationToken);
+    }
+
+    /// <summary>Replace the profile photo of the number given in the path (multipart, JPEG/PNG up to 5 MB) — <c>POST /official/numbers/{id}/profile/photo</c>.</summary>
+    /// <remarks>Uploads the image to Meta and sets it as the profile photo in one call. WhatsApp Business has only the round profile photo — there is no cover image. Meta recommends 640x640.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Connected number id (`id` from GET /official/numbers).</param>
+    /// <param name="file">Arquivo enviado como <c>multipart/form-data</c> (campo <c>file</c>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="BusinessProfile"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<BusinessProfile> UploadOfficialNumberProfilePhotoAsync(string id, FileUpload file, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/numbers/" + PathSegment.Encode(id, "id") + "/profile/photo";
+        if (file is null) throw new ArgumentNullException(nameof(file));
+        return Http.SendAsync<BusinessProfile>(HttpMethod.Post, path, null, RequestBody.Multipart(file), options, cancellationToken);
+    }
+
+    /// <summary>Replace the profile photo of the project's default number (multipart, JPEG/PNG up to 5 MB) — <c>POST /official/profile/photo</c>.</summary>
+    /// <remarks>Uploads the image to Meta and sets it as the profile photo in one call. WhatsApp Business has only the round profile photo — there is no cover image. Meta recommends 640x640.</remarks>
+    /// <param name="file">Arquivo enviado como <c>multipart/form-data</c> (campo <c>file</c>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="BusinessProfile"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<BusinessProfile> UploadOfficialProfilePhotoAsync(FileUpload file, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/profile/photo";
+        if (file is null) throw new ArgumentNullException(nameof(file));
+        return Http.SendAsync<BusinessProfile>(HttpMethod.Post, path, null, RequestBody.Multipart(file), options, cancellationToken);
     }
 
     // ── pools ───────────────────────────────────────────────────────────────────────────────────────────────
@@ -2371,6 +2690,117 @@ public sealed partial class BzapperClient
     {
         var path = "/healthz";
         return Http.SendAsync<Health>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    // ── templates ───────────────────────────────────────────────────────────────────────────────────────────
+
+    /// <summary>Create a template and submit it to Meta for review — <c>POST /templates</c>.</summary>
+    /// <remarks>You describe header, body, footer and buttons; we build the component format Meta expects — with its examples nested three levels deep and the rules it does not document alongside. Validation happens BEFORE submission, and that is where this endpoint earns its keep: Meta takes up to 24 hours to answer, rejects with a terse reason, and caps how many templates you may submit. A variable at the start or end of the body, numbering that skips, two variables side by side, a missing example — each returns 422 with a message that says what to fix. `advice` comes back with things that did not block the submission but change the outcome — promotional wording in a UTILITY template, for instance, which Meta reclassifies on its own, and reclassification changes what the conversation COSTS. The decision arrives later through the `template.approved` / `template.rejected` webhooks.</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="TemplateSpec"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="CreateTemplateResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<CreateTemplateResult> CreateTemplateAsync(TemplateSpec request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<CreateTemplateResult>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
+    /// <summary>Delete a template — <c>DELETE /templates/{id}</c>.</summary>
+    /// <remarks>Removes it here and at Meta. Meta deletes ALL languages of a name at once — so when another language of the same name is still registered here, we leave Meta alone rather than delete something you did not ask to delete.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>Nada (a API responde sem corpo).</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task DeleteTemplateAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/" + PathSegment.Encode(id, "id");
+        return Http.SendVoidAsync(HttpMethod.Delete, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Get the project fallback template — <c>GET /templates/fallback</c>.</summary>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="GetFallbackTemplateResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<GetFallbackTemplateResult> GetFallbackTemplateAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/fallback";
+        return Http.SendAsync<GetFallbackTemplateResult>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Get one template — <c>GET /templates/{id}</c>.</summary>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="Template"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<Template> GetTemplateAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/" + PathSegment.Encode(id, "id");
+        return Http.SendAsync<Template>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>List the project templates — <c>GET /templates</c>.</summary>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="ListTemplatesResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<ListTemplatesResult> ListTemplatesAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates";
+        return Http.SendAsync<ListTemplatesResult>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Set the template sent when the 24-hour window is closed — <c>PUT /templates/fallback</c>.</summary>
+    /// <remarks>This is what makes the same `POST /messages/text` work inside and outside the window. When the contact has not written for over 24 hours, free text is refused by Meta; with a fallback configured, the platform sends this approved template instead and reports the detour in the `delivery` field of the response. Only an APPROVED template is accepted: a fallback that cannot be sent would only postpone the failure to the first send outside the window. An empty `template_id` clears it.</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="SetFallbackTemplateRequest"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>Nada (a API responde sem corpo).</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task SetFallbackTemplateAsync(SetFallbackTemplateRequest request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/fallback";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendVoidAsync(HttpMethod.Put, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
+    /// <summary>Import templates that exist at Meta and not here — <c>POST /templates/sync</c>.</summary>
+    /// <remarks>For the account that already used the Cloud API before bZapper and created templates in WhatsApp Manager, and to repair a webhook that never arrived. Without it those templates would exist for Meta and be invisible here — and sending by name would say they do not exist.</remarks>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="SyncTemplatesResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<SyncTemplatesResult> SyncTemplatesAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/sync";
+        return Http.SendAsync<SyncTemplatesResult>(HttpMethod.Post, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Upload the header sample of a template (multipart, JPEG/PNG/MP4/PDF up to 10 MB) — <c>POST /templates/media</c>.</summary>
+    /// <remarks>Meta reviews media headers from a sample file. Upload it here and pass the returned `url` as `header.media_url` in POST /templates — no need to host the file anywhere. It is only the sample Meta reviews, not the media that goes out on each send. Samples never used by a template are cleaned up.</remarks>
+    /// <param name="file">Arquivo enviado como <c>multipart/form-data</c> (campo <c>file</c>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="UploadTemplateMediaResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<UploadTemplateMediaResult> UploadTemplateMediaAsync(FileUpload file, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/media";
+        if (file is null) throw new ArgumentNullException(nameof(file));
+        return Http.SendAsync<UploadTemplateMediaResult>(HttpMethod.Post, path, null, RequestBody.Multipart(file), options, cancellationToken);
     }
 
     // ── usage ───────────────────────────────────────────────────────────────────────────────────────────────
@@ -2478,6 +2908,21 @@ public sealed partial class BzapperClient
     {
         var path = "/webhooks";
         return Http.SendAsync<WebhookList>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Redeliver a failed delivery — <c>POST /webhooks/{id}/deliveries/{delivery_id}/redeliver</c>.</summary>
+    /// <remarks>Sends a FAILED delivery again: same body and same event_id (your idempotency keeps working), signed with the webhook's CURRENT secret. One attempt; the outcome updates the delivery. Only deliveries that failed in the last 7 days can be redelivered — the body carries conversation content and is kept only for that long.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Webhook ID (UUID).</param>
+    /// <param name="deliveryId"><c>delivery_id</c> (caminho). Obrigatório. Delivery id (from listWebhookDeliveries).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="WebhookRedelivery"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<WebhookRedelivery> RedeliverWebhookDeliveryAsync(string id, string deliveryId, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/webhooks/" + PathSegment.Encode(id, "id") + "/deliveries/" + PathSegment.Encode(deliveryId, "delivery_id") + "/redeliver";
+        return Http.SendAsync<WebhookRedelivery>(HttpMethod.Post, path, null, null, options, cancellationToken);
     }
 
     /// <summary>Send a signed sample event to this webhook and report the result — <c>POST /webhooks/{id}/test</c>.</summary>

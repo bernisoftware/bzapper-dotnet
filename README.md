@@ -7,7 +7,7 @@ Connect** — com novas tentativas idempotentes, erros tipados e modelos tipados
 (e só no `netstandard2.0`).
 
 ```bash
-dotnet add package Bzapper --version 0.8.2
+dotnet add package Bzapper --version 0.9.0
 ```
 
 ```csharp
@@ -406,7 +406,7 @@ await bz.SendTextAsync(
 Cada release declara se muda a superfície pública. Fixe a versão exata e atualize de propósito:
 
 ```xml
-<PackageReference Include="Bzapper" Version="[0.8.2]" />
+<PackageReference Include="Bzapper" Version="[0.9.0]" />
 ```
 
 ## Desenvolvimento

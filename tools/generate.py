@@ -294,7 +294,14 @@ def load_ops():
                     op.multipart_fields = [k for k in (resolve(schema).get("properties") or {}) if k != "file"]
                 else:
                     op.body_kind = "json"
-                    if "$ref" in schema:
+                    pinned_body = published_body_type(op)
+                    if "$ref" in schema and pinned_body and pinned_body != ref_name(schema["$ref"]) \
+                            and not is_enum_schema(resolve(schema)):
+                        # A spec deu nome (ou outro nome) ao schema do corpo depois de publicado: o modelo
+                        # segue saindo com o nome PUBLICADO (renomear a classe quebraria quem a instancia).
+                        ensure_model(pinned_body, resolve(schema), resolve(schema).get("description"))
+                        op.body_type = pinned_body
+                    elif "$ref" in schema:
                         op.body_type, _ = cs_type(schema, pascal(op.id) + "Request")
                         op.body_type = op.body_type.rstrip("?")
                     else:
@@ -337,6 +344,16 @@ def load_ops():
     if missing:
         raise SystemExit(f"ops de cases.json sem operação na spec: {sorted(missing)}")
     return ops
+
+
+def published_body_type(op):
+    """Tipo do parâmetro `request` na superfície publicada (None se a op é nova ou não tinha corpo JSON)."""
+    base = BASELINE.get(op.id)
+    for p in (base or {}).get("params") or []:
+        t, n = p.rsplit(" ", 1)
+        if n == "request":
+            return t
+    return None
 
 
 def apply_baseline(op):
