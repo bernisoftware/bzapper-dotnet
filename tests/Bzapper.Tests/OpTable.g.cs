@@ -183,6 +183,7 @@ internal static partial class OpTable
         ["sendText"] = async (c, p, a, o) => { return await c.SendTextAsync(a.Body<SendText>(), options: o); },
         ["sendVideo"] = async (c, p, a, o) => { return await c.SendVideoAsync(a.Body<SendMedia>(), options: o); },
         ["setBrand"] = async (c, p, a, o) => { return await c.SetBrandAsync(a.Body<BrandProfile>(), options: o); },
+        ["getOfficialNumberHealth"] = async (c, p, a, o) => { a.NoBody(); return await c.GetOfficialNumberHealthAsync(a.Path("id"), options: o); },
         ["setDefaultOfficialNumber"] = async (c, p, a, o) => { a.NoBody(); await c.SetDefaultOfficialNumberAsync(a.Path("id"), options: o); return null; },
         ["getOTPTemplate"] = async (c, p, a, o) => { a.NoBody(); return await c.GetOTPTemplateAsync(options: o); },
         ["setOTPTemplate"] = async (c, p, a, o) => { await c.SetOTPTemplateAsync(a.Body<SetOTPTemplateRequest>(), options: o); return null; },

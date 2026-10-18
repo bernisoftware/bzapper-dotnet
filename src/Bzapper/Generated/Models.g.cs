@@ -2267,6 +2267,45 @@ public class GetOfficialMediaResult : BzapperObject
     public long? FileSize { get; set; }
 }
 
+/// <summary><c>GetOfficialNumberHealthResult</c> (veja a referência da API).</summary>
+public class GetOfficialNumberHealthResult : BzapperObject
+{
+    /// <summary><c>quality_rating</c></summary>
+    [JsonPropertyName("quality_rating")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? QualityRating { get; set; }
+
+    /// <summary><c>messaging_limit</c></summary>
+    [JsonPropertyName("messaging_limit")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? MessagingLimit { get; set; }
+
+    /// <summary><c>history</c></summary>
+    [JsonPropertyName("history")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<GetOfficialNumberHealthResultHistoryItem>? History { get; set; }
+}
+
+/// <summary><c>GetOfficialNumberHealthResultHistoryItem</c> (veja a referência da API).</summary>
+public class GetOfficialNumberHealthResultHistoryItem : BzapperObject
+{
+    /// <summary><c>quality_rating</c></summary>
+    [JsonPropertyName("quality_rating")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? QualityRating { get; set; }
+
+    /// <summary><c>messaging_limit</c></summary>
+    [JsonPropertyName("messaging_limit")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? MessagingLimit { get; set; }
+
+    /// <summary><c>at</c></summary>
+    [JsonPropertyName("at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? At { get; set; }
+}
+
 /// <summary><c>GetOfficialSignupConfigResult</c> (veja a referência da API).</summary>
 public class GetOfficialSignupConfigResult : BzapperObject
 {

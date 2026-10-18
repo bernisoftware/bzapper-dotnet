@@ -2413,6 +2413,20 @@ public sealed partial class BzapperClient
         return Http.SendAsync<GetOfficialMediaResult>(HttpMethod.Get, path, query, null, options, cancellationToken);
     }
 
+    /// <summary>Quality and messaging-limit history of one number — <c>GET /official/numbers/{id}/health</c>.</summary>
+    /// <remarks>Every change of quality rating and messaging limit (from Meta's webhook or a live check), newest first — what explains why the limit dropped or when quality worsened. Repeated states are not history and are not recorded.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="GetOfficialNumberHealthResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<GetOfficialNumberHealthResult> GetOfficialNumberHealthAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/official/numbers/" + PathSegment.Encode(id, "id") + "/health";
+        return Http.SendAsync<GetOfficialNumberHealthResult>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
     /// <summary>Read the business profile of the number given in the path — <c>GET /official/numbers/{id}/profile</c>.</summary>
     /// <remarks>The business profile is what the end customer sees when opening the chat: short "about" line, description, address, e-mail, sector and up to two websites. It lives on the NUMBER, not on the account — with several numbers, each has its own.</remarks>
     /// <param name="id"><c>id</c> (caminho). Obrigatório. Connected number id (`id` from GET /official/numbers).</param>
