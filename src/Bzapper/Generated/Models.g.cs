@@ -1754,6 +1754,15 @@ public class CreateTaxon : BzapperObject
     public string? Color { get; set; }
 }
 
+/// <summary><c>CreateTemplateFromLibraryResult</c> (veja a referência da API).</summary>
+public class CreateTemplateFromLibraryResult : BzapperObject
+{
+    /// <summary><c>template</c> — A template as bZapper holds it. Meta owns the truth about `status`; this is our copy.</summary>
+    [JsonPropertyName("template")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Template? Template { get; set; }
+}
+
 /// <summary><c>CreateTemplateResult</c> (veja a referência da API).</summary>
 public class CreateTemplateResult : BzapperObject
 {
@@ -1818,6 +1827,20 @@ public class EditMessageRequest : BzapperObject
     [JsonPropertyName("text")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Text { get; set; }
+}
+
+/// <summary><c>EditTemplateResult</c> (veja a referência da API).</summary>
+public class EditTemplateResult : BzapperObject
+{
+    /// <summary><c>template</c> — A template as bZapper holds it. Meta owns the truth about `status`; this is our copy.</summary>
+    [JsonPropertyName("template")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Template? Template { get; set; }
+
+    /// <summary><c>advice</c></summary>
+    [JsonPropertyName("advice")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Advice { get; set; }
 }
 
 /// <summary>EFFECTIVE account limits for the authenticated account (plan, add-ons, free allowances and period usage).</summary>
@@ -2763,6 +2786,118 @@ public class Label : BzapperObject
     public string? Color { get; set; }
 }
 
+/// <summary><c>LibraryCreate</c> (veja a referência da API).</summary>
+public class LibraryCreate : BzapperObject
+{
+    /// <summary><c>library_template_name</c> — Obrigatório.</summary>
+    [JsonPropertyName("library_template_name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? LibraryTemplateName { get; set; }
+
+    /// <summary><c>name</c> — Your template name (defaults to the library name).</summary>
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; set; }
+
+    /// <summary><c>language</c> — Obrigatório.</summary>
+    [JsonPropertyName("language")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Language { get; set; }
+
+    /// <summary><c>button_inputs</c> — What each URL / phone button of the library template needs, in order.</summary>
+    [JsonPropertyName("button_inputs")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<LibraryCreateButtonInputsItem>? ButtonInputs { get; set; }
+
+    /// <summary><c>code_expiry_minutes</c> — Authentication items only (default 10).</summary>
+    [JsonPropertyName("code_expiry_minutes")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? CodeExpiryMinutes { get; set; }
+}
+
+/// <summary><c>LibraryCreateButtonInputsItem</c> (veja a referência da API).</summary>
+public class LibraryCreateButtonInputsItem : BzapperObject
+{
+    /// <summary><c>type</c></summary>
+    [JsonPropertyName("type")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Type { get; set; }
+
+    /// <summary><c>url</c></summary>
+    [JsonPropertyName("url")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Url { get; set; }
+
+    /// <summary><c>url_suffix_example</c></summary>
+    [JsonPropertyName("url_suffix_example")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? UrlSuffixExample { get; set; }
+
+    /// <summary><c>phone</c></summary>
+    [JsonPropertyName("phone")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Phone { get; set; }
+}
+
+/// <summary>A ready-made template from Meta's Template Library.</summary>
+public class LibraryTemplate : BzapperObject
+{
+    /// <summary><c>id</c></summary>
+    [JsonPropertyName("id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Id { get; set; }
+
+    /// <summary><c>name</c> — Library name — pass it as `library_template_name`.</summary>
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; set; }
+
+    /// <summary><c>language</c></summary>
+    [JsonPropertyName("language")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Language { get; set; }
+
+    /// <summary><c>category</c></summary>
+    [JsonPropertyName("category")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Category { get; set; }
+
+    /// <summary><c>topic</c></summary>
+    [JsonPropertyName("topic")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Topic { get; set; }
+
+    /// <summary><c>usecase</c></summary>
+    [JsonPropertyName("usecase")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Usecase { get; set; }
+
+    /// <summary><c>industry</c></summary>
+    [JsonPropertyName("industry")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Industry { get; set; }
+
+    /// <summary><c>header</c></summary>
+    [JsonPropertyName("header")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Header { get; set; }
+
+    /// <summary><c>body</c> — Body with {{n}} variables.</summary>
+    [JsonPropertyName("body")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Body { get; set; }
+
+    /// <summary><c>body_params</c> — Example value of each variable.</summary>
+    [JsonPropertyName("body_params")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? BodyParams { get; set; }
+
+    /// <summary><c>buttons</c></summary>
+    [JsonPropertyName("buttons")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<JsonElement>? Buttons { get; set; }
+}
+
 /// <summary><c>ListAvailableOfficialNumbersResult</c> (veja a referência da API).</summary>
 public class ListAvailableOfficialNumbersResult : BzapperObject
 {
@@ -2806,6 +2941,15 @@ public class ListLabelsResult : BzapperObject
     [JsonPropertyName("data")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<Label>? Data { get; set; }
+}
+
+/// <summary><c>ListLibraryTemplatesResult</c> (veja a referência da API).</summary>
+public class ListLibraryTemplatesResult : BzapperObject
+{
+    /// <summary><c>templates</c></summary>
+    [JsonPropertyName("templates")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<LibraryTemplate>? Templates { get; set; }
 }
 
 /// <summary><c>ListMetaWebhookEventsResult</c> (veja a referência da API).</summary>

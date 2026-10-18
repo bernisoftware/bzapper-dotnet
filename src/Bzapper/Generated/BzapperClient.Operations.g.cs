@@ -2726,6 +2726,21 @@ public sealed partial class BzapperClient
         return Http.SendAsync<CreateTemplateResult>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
     }
 
+    /// <summary>Create a template from the Template Library — <c>POST /templates/library</c>.</summary>
+    /// <remarks>The text is Meta's, unchanged — that is what makes it approved at once. You only provide what the buttons need: the site link of a URL button (with an example of the variable suffix, when there is one) or the phone of a call button. Authentication items take `code_expiry_minutes`.</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="LibraryCreate"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="CreateTemplateFromLibraryResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<CreateTemplateFromLibraryResult> CreateTemplateFromLibraryAsync(LibraryCreate request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/library";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<CreateTemplateFromLibraryResult>(HttpMethod.Post, path, null, RequestBody.Json(request), options, cancellationToken);
+    }
+
     /// <summary>Delete a template — <c>DELETE /templates/{id}</c>.</summary>
     /// <remarks>Removes it here and at Meta. Meta deletes ALL languages of a name at once — so when another language of the same name is still registered here, we leave Meta alone rather than delete something you did not ask to delete.</remarks>
     /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
@@ -2738,6 +2753,22 @@ public sealed partial class BzapperClient
     {
         var path = "/templates/" + PathSegment.Encode(id, "id");
         return Http.SendVoidAsync(HttpMethod.Delete, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Edit a template (content goes back to Meta review) — <c>PUT /templates/{id}</c>.</summary>
+    /// <remarks>Same body as creation; `name` and `language` are the template identity and do not change. Meta allows editing an APPROVED template once every 24 hours and ten times in 30 days (rejected or paused: no limit), sends it back to review (the template returns to `PENDING` and does not send until the decision arrives by webhook) and does not let an approved template change category.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório.</param>
+    /// <param name="request">Corpo da requisição (<see cref="TemplateSpec"/>).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="EditTemplateResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<EditTemplateResult> EditTemplateAsync(string id, TemplateSpec request, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/" + PathSegment.Encode(id, "id");
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        return Http.SendAsync<EditTemplateResult>(HttpMethod.Put, path, null, RequestBody.Json(request), options, cancellationToken);
     }
 
     /// <summary>Get the project fallback template — <c>GET /templates/fallback</c>.</summary>
@@ -2776,6 +2807,25 @@ public sealed partial class BzapperClient
     {
         var path = "/templates/" + PathSegment.Encode(id, "id");
         return Http.SendAsync<Template>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Browse Meta's Template Library (ready-made utility and authentication texts) — <c>GET /templates/library</c>.</summary>
+    /// <remarks>Texts Meta has already approved. A template created from one of them without changing the text is approved immediately — no 24-hour review.</remarks>
+    /// <param name="search"><c>search</c> (query). Free text: order, delivery, payment…</param>
+    /// <param name="topic"><c>topic</c> (query).</param>
+    /// <param name="usecase"><c>usecase</c> (query).</param>
+    /// <param name="industry"><c>industry</c> (query).</param>
+    /// <param name="language"><c>language</c> (query). e.g. pt_BR.</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="ListLibraryTemplatesResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<ListLibraryTemplatesResult> ListLibraryTemplatesAsync(string? search = null, string? topic = null, string? usecase = null, string? industry = null, string? language = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/library";
+        var query = new Query().Add("search", search).Add("topic", topic).Add("usecase", usecase).Add("industry", industry).Add("language", language);
+        return Http.SendAsync<ListLibraryTemplatesResult>(HttpMethod.Get, path, query, null, options, cancellationToken);
     }
 
     /// <summary>List the project templates — <c>GET /templates</c>.</summary>
