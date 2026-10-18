@@ -1249,6 +1249,16 @@ public class ContactImport : BzapperObject
     [JsonPropertyName("dry_run")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? DryRun { get; set; }
+
+    /// <summary><c>tags</c> — Tags applied to EVERY row (added to each row's own tags).</summary>
+    [JsonPropertyName("tags")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Tags { get; set; }
+
+    /// <summary><c>groups</c> — Groups applied to EVERY row (added to each row's own groups).</summary>
+    [JsonPropertyName("groups")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Groups { get; set; }
 }
 
 /// <summary><c>ContactImportResult</c> (veja a referência da API).</summary>
@@ -1298,10 +1308,15 @@ public class ContactImportResult : BzapperObject
 /// <summary><c>ContactImportRow</c> (veja a referência da API).</summary>
 public class ContactImportRow : BzapperObject
 {
-    /// <summary><c>phone</c> — +DDIdigits. Obrigatório.</summary>
+    /// <summary><c>phone</c> — +DDIdigits, or the WhatsApp LID (`&lt;digits&gt;@lid`). Digits without `@lid` are always a phone. Obrigatório.</summary>
     [JsonPropertyName("phone")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Phone { get; set; }
+
+    /// <summary><c>lid</c> — WhatsApp LID (`&lt;digits&gt;@lid`, or just the digits). With a phone too, the LID-only contact merges into the phone one.</summary>
+    [JsonPropertyName("lid")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Lid { get; set; }
 
     /// <summary><c>name</c></summary>
     [JsonPropertyName("name")]
@@ -1352,7 +1367,7 @@ public class ContactImportRowIssue : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Phone { get; set; }
 
-    /// <summary><c>reason</c> — Errors: phone_required, invalid_phone, invalid_email, write_failed, taxonomy_failed. Skips: duplicate_phone, suppressed, opted_out, blocked, unreachable, deleted. Obrigatório.</summary>
+    /// <summary><c>reason</c> — Errors: phone_required, invalid_phone, invalid_lid, invalid_email, write_failed, taxonomy_failed. Skips: duplicate_phone, suppressed, opted_out, blocked, unreachable, deleted. Obrigatório.</summary>
     [JsonPropertyName("reason")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Reason { get; set; }
@@ -1487,6 +1502,11 @@ public class ContactRecord : BzapperObject
     [JsonPropertyName("groups")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<string>? Groups { get; set; }
+
+    /// <summary><c>lid</c> — WhatsApp LID (`&lt;digits&gt;@lid`) — the address of a LID-only contact, or the one WhatsApp associated with the phone. Only on the contact detail.</summary>
+    [JsonPropertyName("lid")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Lid { get; set; }
 }
 
 /// <summary><c>ContactRecordList</c> (veja a referência da API).</summary>
@@ -1625,10 +1645,15 @@ public class CreateConnectSessionResult : BzapperObject
 /// <summary><c>CreateContact</c> (veja a referência da API).</summary>
 public class CreateContact : BzapperObject
 {
-    /// <summary><c>phone</c> — +DDIdigits (E.164 without spaces). Obrigatório.</summary>
+    /// <summary><c>phone</c> — +DDIdigits (E.164 without spaces), or the WhatsApp LID (`&lt;digits&gt;@lid`). Obrigatório.</summary>
     [JsonPropertyName("phone")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Phone { get; set; }
+
+    /// <summary><c>lid</c> — WhatsApp LID (`&lt;digits&gt;@lid`). With a phone too, the LID-only contact merges into the phone one.</summary>
+    [JsonPropertyName("lid")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Lid { get; set; }
 
     /// <summary><c>name</c></summary>
     [JsonPropertyName("name")]
