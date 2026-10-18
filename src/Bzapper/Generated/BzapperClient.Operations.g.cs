@@ -2903,7 +2903,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Choose the template that carries the verification code outside the window — <c>PUT /templates/otp</c>.</summary>
-    /// <remarks>Must be an APPROVED template of the Authentication category or — until Meta releases that category for the account (business verification + 2,000 daily limit) — a provisional Utility template with a copy-code button and at most one body variable; the code goes in the variable and in the button. An empty `template_id` clears the choice (the first approved Authentication template is used again).</remarks>
+    /// <remarks>Must be an APPROVED template of the Authentication category or — until Meta releases that category for the account (business verification + 2,000 daily limit) — a provisional Utility template with exactly one body variable, which receives the code (Meta does not accept the copy-code button in Utility). An empty `template_id` clears the choice (the first approved Authentication template is used again).</remarks>
     /// <param name="request">Corpo da requisição (<see cref="SetOTPTemplateRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>

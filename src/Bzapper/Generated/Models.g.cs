@@ -1835,7 +1835,7 @@ public class CreateWebhook : BzapperObject
     public string? NumberFilter { get; set; }
 }
 
-/// <summary>Present ONLY when the platform took a path other than the one you asked for: the 24-hour window with the contact was closed, so the free text went out as the project fallback template (`template_fallback`), or the verification code went out as the project code template — Authentication (`authentication_template`) or, until Meta releases that category, the provisional Utility template with a copy-code button (`utility_template`). The platform decides, but it does not hide.</summary>
+/// <summary>Present ONLY when the platform took a path other than the one you asked for: the 24-hour window with the contact was closed, so the free text went out as the project fallback template (`template_fallback`), or the verification code went out as the project code template — Authentication (`authentication_template`) or, until Meta releases that category, the provisional Utility template with the code in the body (`utility_template`). The platform decides, but it does not hide.</summary>
 public class DeliveryInfo : BzapperObject
 {
     /// <summary><c>via</c></summary>
@@ -3335,7 +3335,7 @@ public class MessageQueued : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ClientReference { get; set; }
 
-    /// <summary><c>delivery</c> — Present ONLY when the platform took a path other than the one you asked for: the 24-hour window with the contact was closed, so the free text went out as the project fallback template (`template_fallback`), or the verification code went out as the project code template — Authentication (`authentication_template`) or, until Meta releases that category, the provisional Utility template with a copy-code button (`utility_template`). The platform decides, but it does not hide.</summary>
+    /// <summary><c>delivery</c> — Present ONLY when the platform took a path other than the one you asked for: the 24-hour window with the contact was closed, so the free text went out as the project fallback template (`template_fallback`), or the verification code went out as the project code template — Authentication (`authentication_template`) or, until Meta releases that category, the provisional Utility template with the code in the body (`utility_template`). The platform decides, but it does not hide.</summary>
     [JsonPropertyName("delivery")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public DeliveryInfo? Delivery { get; set; }
@@ -5111,7 +5111,7 @@ public class TemplateBody : BzapperObject
 /// <summary><c>TemplateButton</c> (veja a referência da API).</summary>
 public class TemplateButton : BzapperObject
 {
-    /// <summary><c>type</c> — Obrigatório.</summary>
+    /// <summary><c>type</c> — `copy_code` (with the coupon in `example`) is MARKETING only — Meta refuses it in UTILITY; AUTHENTICATION gets its own copy-code button, built by us. Obrigatório.</summary>
     [JsonPropertyName("type")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Type { get; set; }
