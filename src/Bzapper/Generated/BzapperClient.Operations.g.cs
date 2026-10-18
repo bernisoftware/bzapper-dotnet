@@ -2809,6 +2809,21 @@ public sealed partial class BzapperClient
         return Http.SendAsync<Template>(HttpMethod.Get, path, null, null, options, cancellationToken);
     }
 
+    /// <summary>Performance of each template (sent, delivered, read, failed) — <c>GET /templates/analytics</c>.</summary>
+    /// <remarks>Counted from the messages sent through each template in the last `days` days, grouped by template name.</remarks>
+    /// <param name="days"><c>days</c> (query).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="GetTemplateAnalyticsResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<GetTemplateAnalyticsResult> GetTemplateAnalyticsAsync(int? days = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/analytics";
+        var query = new Query().Add("days", days);
+        return Http.SendAsync<GetTemplateAnalyticsResult>(HttpMethod.Get, path, query, null, options, cancellationToken);
+    }
+
     /// <summary>Browse Meta's Template Library (ready-made utility and authentication texts) — <c>GET /templates/library</c>.</summary>
     /// <remarks>Texts Meta has already approved. A template created from one of them without changing the text is approved immediately — no 24-hour review.</remarks>
     /// <param name="search"><c>search</c> (query). Free text: order, delivery, payment…</param>

@@ -62,6 +62,7 @@ internal static partial class OpTable
         ["deleteSuppression"] = async (c, p, a, o) => { a.NoBody(); await c.DeleteSuppressionAsync(a.QStr("phone")!, options: o); return null; },
         ["deleteTag"] = async (c, p, a, o) => { a.NoBody(); await c.DeleteTagAsync(a.Path("id"), options: o); return null; },
         ["deleteTemplate"] = async (c, p, a, o) => { a.NoBody(); await c.DeleteTemplateAsync(a.Path("id"), options: o); return null; },
+        ["getTemplateAnalytics"] = async (c, p, a, o) => { a.NoBody(); return await c.GetTemplateAnalyticsAsync(days: a.QInt("days"), options: o); },
         ["editTemplate"] = async (c, p, a, o) => { return await c.EditTemplateAsync(a.Path("id"), a.Body<TemplateSpec>(), options: o); },
         ["listLibraryTemplates"] = async (c, p, a, o) => { a.NoBody(); return await c.ListLibraryTemplatesAsync(search: a.QStr("search"), topic: a.QStr("topic"), usecase: a.QStr("usecase"), industry: a.QStr("industry"), language: a.QStr("language"), options: o); },
         ["createTemplateFromLibrary"] = async (c, p, a, o) => { return await c.CreateTemplateFromLibraryAsync(a.Body<LibraryCreate>(), options: o); },

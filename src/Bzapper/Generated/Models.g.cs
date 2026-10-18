@@ -2285,6 +2285,20 @@ public class GetProjectsHealthResultDataItem : BzapperObject
     public Dictionary<string, int>? Statuses { get; set; }
 }
 
+/// <summary><c>GetTemplateAnalyticsResult</c> (veja a referência da API).</summary>
+public class GetTemplateAnalyticsResult : BzapperObject
+{
+    /// <summary><c>days</c></summary>
+    [JsonPropertyName("days")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Days { get; set; }
+
+    /// <summary><c>templates</c></summary>
+    [JsonPropertyName("templates")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<TemplateStats>? Templates { get; set; }
+}
+
 /// <summary><c>Group</c> (veja a referência da API).</summary>
 public class Group : BzapperObject
 {
@@ -4670,7 +4684,7 @@ public class SendTemplate : SendBase
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<string>? Variables { get; set; }
 
-    /// <summary><c>header_variables</c> — Text header: the value of its variable. Image, video or document header: the media URL for THIS send in the first position — omitted, the sample media registered when the template was created goes out (Meta requires the media on every send).</summary>
+    /// <summary><c>header_variables</c> — Text header: the value of its variable. Image, video or document header: the media URL for THIS send in the first position — omitted, the sample media registered when the template was created goes out (Meta requires the media on every send). Location header: `[latitude, longitude, place name, address]` (the last two optional).</summary>
     [JsonPropertyName("header_variables")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<string>? HeaderVariables { get; set; }
@@ -5018,7 +5032,7 @@ public class TemplateButton : BzapperObject
 /// <summary><c>TemplateHeader</c> (veja a referência da API).</summary>
 public class TemplateHeader : BzapperObject
 {
-    /// <summary><c>type</c> — Obrigatório.</summary>
+    /// <summary><c>type</c> — `location` has no sample: the map goes with each send, in `header_variables` (latitude, longitude, place name, address). Obrigatório.</summary>
     [JsonPropertyName("type")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Type { get; set; }
@@ -5081,6 +5095,45 @@ public class TemplateSpec : BzapperObject
     [JsonPropertyName("code_expiry_minutes")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? CodeExpiryMinutes { get; set; }
+}
+
+/// <summary><c>TemplateStats</c> (veja a referência da API).</summary>
+public class TemplateStats : BzapperObject
+{
+    /// <summary><c>name</c></summary>
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; set; }
+
+    /// <summary><c>sent</c></summary>
+    [JsonPropertyName("sent")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Sent { get; set; }
+
+    /// <summary><c>delivered</c></summary>
+    [JsonPropertyName("delivered")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Delivered { get; set; }
+
+    /// <summary><c>read</c></summary>
+    [JsonPropertyName("read")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Read { get; set; }
+
+    /// <summary><c>failed</c></summary>
+    [JsonPropertyName("failed")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Failed { get; set; }
+
+    /// <summary><c>delivery_rate</c> — Delivered / sent, in percent.</summary>
+    [JsonPropertyName("delivery_rate")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? DeliveryRate { get; set; }
+
+    /// <summary><c>read_rate</c> — Read / sent, in percent.</summary>
+    [JsonPropertyName("read_rate")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? ReadRate { get; set; }
 }
 
 /// <summary><c>TestWebhookRequest</c> (veja a referência da API).</summary>
