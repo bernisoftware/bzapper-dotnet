@@ -4698,6 +4698,36 @@ public class SendTemplate : SendBase
     [JsonPropertyName("code")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Code { get; set; }
+
+    /// <summary><c>offer_expires_at</c> — Limited-time offer with `has_expiration`: the deadline of THIS send (RFC 3339) — the countdown runs to it. Required for that template; returns 422 before Meta otherwise.</summary>
+    [JsonPropertyName("offer_expires_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? OfferExpiresAt { get; set; }
+
+    /// <summary><c>cards</c> — Carousel templates: the values of each card, in order. `header_url` is the media of the card for this send (omitted, the sample registered at creation goes out).</summary>
+    [JsonPropertyName("cards")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<SendTemplateCardsItem>? Cards { get; set; }
+}
+
+/// <summary><c>SendTemplateCardsItem</c> (veja a referência da API).</summary>
+public class SendTemplateCardsItem : BzapperObject
+{
+    /// <summary><c>header_url</c></summary>
+    [JsonPropertyName("header_url")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? HeaderUrl { get; set; }
+
+    /// <summary><c>variables</c></summary>
+    [JsonPropertyName("variables")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Variables { get; set; }
+
+    /// <summary><c>button_variables</c> — Dynamic URL suffix (or quick-reply payload) by button index.</summary>
+    [JsonPropertyName("button_variables")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? ButtonVariables { get; set; }
 }
 
 /// <summary><c>SendText</c> (veja a referência da API).</summary>
@@ -5095,6 +5125,49 @@ public class TemplateSpec : BzapperObject
     [JsonPropertyName("code_expiry_minutes")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? CodeExpiryMinutes { get; set; }
+
+    /// <summary><c>limited_time_offer</c> — MARKETING only. Turns the template into a limited-time offer: a badge (up to 16 characters) and, with `has_expiration`, a countdown to the deadline sent in `offer_expires_at`. No footer; header only image or video; needs a URL button (and, with a deadline, the copy-code button).</summary>
+    [JsonPropertyName("limited_time_offer")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public TemplateSpecLimitedTimeOffer? LimitedTimeOffer { get; set; }
+
+    /// <summary><c>cards</c> — Carousel (MARKETING or UTILITY): 2 to 10 cards. The template keeps only the opening `body`; each card has its own image or video, text (up to 160 characters) and 1–2 buttons (quick reply, URL or phone). Meta requires the same media type and the same button types, in the same order, on every card.</summary>
+    [JsonPropertyName("cards")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<TemplateSpecCardsItem>? Cards { get; set; }
+}
+
+/// <summary><c>TemplateSpecCardsItem</c> (veja a referência da API).</summary>
+public class TemplateSpecCardsItem : BzapperObject
+{
+    /// <summary><c>header</c> — Obrigatório.</summary>
+    [JsonPropertyName("header")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public TemplateHeader? Header { get; set; }
+
+    /// <summary><c>body</c> — Obrigatório.</summary>
+    [JsonPropertyName("body")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public TemplateBody? Body { get; set; }
+
+    /// <summary><c>buttons</c> — Obrigatório.</summary>
+    [JsonPropertyName("buttons")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<TemplateButton>? Buttons { get; set; }
+}
+
+/// <summary>MARKETING only. Turns the template into a limited-time offer: a badge (up to 16 characters) and, with `has_expiration`, a countdown to the deadline sent in `offer_expires_at`. No footer; header only image or video; needs a URL button (and, with a deadline, the copy-code button).</summary>
+public class TemplateSpecLimitedTimeOffer : BzapperObject
+{
+    /// <summary><c>text</c></summary>
+    [JsonPropertyName("text")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Text { get; set; }
+
+    /// <summary><c>has_expiration</c></summary>
+    [JsonPropertyName("has_expiration")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? HasExpiration { get; set; }
 }
 
 /// <summary><c>TemplateStats</c> (veja a referência da API).</summary>
