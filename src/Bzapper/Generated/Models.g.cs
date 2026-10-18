@@ -689,6 +689,40 @@ public class CampaignEstimate : BzapperObject
     public string? EstimatedHuman { get; set; }
 }
 
+/// <summary>What Meta will charge for a template campaign, and the pace the daily limit imposes.</summary>
+public class CampaignMetaCost : BzapperObject
+{
+    /// <summary><c>currency</c></summary>
+    [JsonPropertyName("currency")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Currency { get; set; }
+
+    /// <summary><c>category</c></summary>
+    [JsonPropertyName("category")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Category { get; set; }
+
+    /// <summary><c>unit_price</c></summary>
+    [JsonPropertyName("unit_price")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? UnitPrice { get; set; }
+
+    /// <summary><c>total</c></summary>
+    [JsonPropertyName("total")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? Total { get; set; }
+
+    /// <summary><c>daily_limit</c> — New contacts the number may reach per day.</summary>
+    [JsonPropertyName("daily_limit")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? DailyLimit { get; set; }
+
+    /// <summary><c>days_needed</c></summary>
+    [JsonPropertyName("days_needed")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? DaysNeeded { get; set; }
+}
+
 /// <summary>A campaign recipient with per-contact delivery state.</summary>
 public class CampaignRecipient : BzapperObject
 {
@@ -3893,6 +3927,11 @@ public class OfficialReadiness : BzapperObject
     [JsonPropertyName("business_review")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? BusinessReview { get; set; }
+
+    /// <summary><c>currency</c> — Currency Meta bills this account in (e.g. BRL, USD). A Brazilian account still in USD has to move to BRL — Meta set the deadline at 2027-06-30.</summary>
+    [JsonPropertyName("currency")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Currency { get; set; }
 
     /// <summary><c>quality_rating</c></summary>
     [JsonPropertyName("quality_rating")]

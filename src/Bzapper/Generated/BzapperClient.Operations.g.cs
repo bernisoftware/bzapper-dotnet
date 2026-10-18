@@ -1035,6 +1035,24 @@ public sealed partial class BzapperClient
         return Http.SendAsync<CampaignEstimate>(HttpMethod.Get, path, query, null, options, cancellationToken);
     }
 
+    /// <summary>What Meta will charge for a template campaign (official rail) — <c>GET /campaigns/meta-cost</c>.</summary>
+    /// <remarks>From the template category (the one Meta bills, which follows reclassification) and Meta's Brazil rate card: the cost of `recipients` messages — charged by Meta on the customer's card; bZapper charges only the subscription — and how many days the number's daily new-contact limit requires.</remarks>
+    /// <param name="recipients"><c>recipients</c> (query). Obrigatório.</param>
+    /// <param name="template"><c>template</c> (query). Obrigatório.</param>
+    /// <param name="language"><c>language</c> (query).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="CampaignMetaCost"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<CampaignMetaCost> EstimateCampaignMetaCostAsync(int recipients, string template, string? language = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/campaigns/meta-cost";
+        if (template is null) throw new ArgumentNullException(nameof(template));
+        var query = new Query().Add("recipients", recipients).Add("template", template).Add("language", language);
+        return Http.SendAsync<CampaignMetaCost>(HttpMethod.Get, path, query, null, options, cancellationToken);
+    }
+
     /// <summary>Get a campaign with stats and variations — <c>GET /campaigns/{id}</c>.</summary>
     /// <param name="id"><c>id</c> (caminho). Obrigatório. Campaign ID (UUID).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>

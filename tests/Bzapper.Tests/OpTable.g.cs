@@ -72,6 +72,7 @@ internal static partial class OpTable
         ["disconnectOfficialNumber"] = async (c, p, a, o) => { a.NoBody(); await c.DisconnectOfficialNumberAsync(a.Path("id"), options: o); return null; },
         ["dryRunCampaign"] = async (c, p, a, o) => { a.NoBody(); return await c.DryRunCampaignAsync(a.Path("id"), options: o); },
         ["editMessage"] = async (c, p, a, o) => { return await c.EditMessageTypedAsync(a.Path("id"), a.Body<EditMessageRequest>(), options: o); },
+        ["estimateCampaignMetaCost"] = async (c, p, a, o) => { a.NoBody(); return await c.EstimateCampaignMetaCostAsync(a.QInt("recipients") ?? 0, a.QStr("template")!, language: a.QStr("language"), options: o); },
         ["estimateCampaign"] = async (c, p, a, o) => { a.NoBody(); return await c.EstimateCampaignAsync(recipients: a.QInt("recipients"), pacing: a.QStr("pacing"), poolId: a.QStr("pool_id"), options: o); },
         ["exchangeConnectCode"] = async (c, p, a, o) => { return await p.ExchangeConnectCodeAsync(a.Body<ExchangeConnectCodeRequest>(), options: o); },
         ["forwardMessage"] = async (c, p, a, o) => { return await c.ForwardMessageTypedAsync(a.Body<ForwardMessageRequest>(), options: o); },
