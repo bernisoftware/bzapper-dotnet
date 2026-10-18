@@ -1835,7 +1835,7 @@ public class CreateWebhook : BzapperObject
     public string? NumberFilter { get; set; }
 }
 
-/// <summary>Present ONLY when the platform took a path other than the one you asked for: the 24-hour window with the contact was closed, so the free text went out as the project fallback template (`template_fallback`), or the verification code went out as the project code template — Authentication (`authentication_template`) or, until Meta releases that category, the provisional Utility template with the code in the body (`utility_template`). The platform decides, but it does not hide.</summary>
+/// <summary>Present ONLY when the platform took a path other than the one you asked for: the 24-hour window with the contact was closed, so the free text went out as the project fallback template (`template_fallback`), or the verification code went out as the project code template — Authentication (`authentication_template`) or, until Meta releases that category, the provisional template — Marketing with a copy-code button (`marketing_template`) or Utility with the code in the body (`utility_template`). The platform decides, but it does not hide.</summary>
 public class DeliveryInfo : BzapperObject
 {
     /// <summary><c>via</c></summary>
@@ -3335,7 +3335,7 @@ public class MessageQueued : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ClientReference { get; set; }
 
-    /// <summary><c>delivery</c> — Present ONLY when the platform took a path other than the one you asked for: the 24-hour window with the contact was closed, so the free text went out as the project fallback template (`template_fallback`), or the verification code went out as the project code template — Authentication (`authentication_template`) or, until Meta releases that category, the provisional Utility template with the code in the body (`utility_template`). The platform decides, but it does not hide.</summary>
+    /// <summary><c>delivery</c> — Present ONLY when the platform took a path other than the one you asked for: the 24-hour window with the contact was closed, so the free text went out as the project fallback template (`template_fallback`), or the verification code went out as the project code template — Authentication (`authentication_template`) or, until Meta releases that category, the provisional template — Marketing with a copy-code button (`marketing_template`) or Utility with the code in the body (`utility_template`). The platform decides, but it does not hide.</summary>
     [JsonPropertyName("delivery")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public DeliveryInfo? Delivery { get; set; }
@@ -5730,6 +5730,25 @@ public class User : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [JsonConverter(typeof(UtcDateTimeConverter))]
     public DateTimeOffset? UpdatedAt { get; set; }
+}
+
+/// <summary><c>ValidateTemplateResult</c> (veja a referência da API).</summary>
+public class ValidateTemplateResult : BzapperObject
+{
+    /// <summary><c>valid</c></summary>
+    [JsonPropertyName("valid")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Valid { get; set; }
+
+    /// <summary><c>problem</c> — What Meta would reject, and how to fix it. Empty when valid.</summary>
+    [JsonPropertyName("problem")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Problem { get; set; }
+
+    /// <summary><c>advice</c> — Things that do not block but change the outcome (e.g. promotional wording in UTILITY).</summary>
+    [JsonPropertyName("advice")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Advice { get; set; }
 }
 
 /// <summary><c>WAMessageRef</c> (veja a referência da API).</summary>

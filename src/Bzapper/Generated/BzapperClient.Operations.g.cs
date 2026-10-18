@@ -2903,7 +2903,7 @@ public sealed partial class BzapperClient
     }
 
     /// <summary>Choose the template that carries the verification code outside the window — <c>PUT /templates/otp</c>.</summary>
-    /// <remarks>Must be an APPROVED template of the Authentication category or — until Meta releases that category for the account (business verification + 2,000 daily limit) — a provisional Utility template with exactly one body variable, which receives the code (Meta does not accept the copy-code button in Utility). An empty `template_id` clears the choice (the first approved Authentication template is used again).</remarks>
+    /// <remarks>Must be an APPROVED template of the Authentication category or — until Meta releases that category for the account (business verification + 2,000 daily limit) — a provisional template: MARKETING with a copy-code button and at most one body variable (the customer copies only the code; Meta accepts that button only in Marketing — costlier, and not delivered to people who opted out of marketing), or UTILITY with exactly one body variable that receives the code in the text. An empty `template_id` clears the choice (the first approved Authentication template is used again).</remarks>
     /// <param name="request">Corpo da requisição (<see cref="SetOTPTemplateRequest"/>).</param>
     /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
     /// <param name="cancellationToken">Cancelamento.</param>
@@ -2943,6 +2943,23 @@ public sealed partial class BzapperClient
         var path = "/templates/media";
         if (file is null) throw new ArgumentNullException(nameof(file));
         return Http.SendAsync<UploadTemplateMediaResult>(HttpMethod.Post, path, null, RequestBody.Multipart(file), options, cancellationToken);
+    }
+
+    /// <summary>Check a template against Meta's rules without submitting it — <c>POST /templates/validate</c>.</summary>
+    /// <remarks>The same validation as creation (variables, examples, lengths, buttons, category rules, offer and carousel rules, a repeated name), with no call to Meta and no submission spent. Use it while the template is being written — the panel does — to never send what Meta would reject. `?id=` checks an edit (its own name does not count as repeated; an approved template cannot change category).</remarks>
+    /// <param name="request">Corpo da requisição (<see cref="TemplateSpec"/>).</param>
+    /// <param name="id"><c>id</c> (query). Template being edited.</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="ValidateTemplateResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<ValidateTemplateResult> ValidateTemplateAsync(TemplateSpec request, string? id = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/templates/validate";
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        var query = new Query().Add("id", id);
+        return Http.SendAsync<ValidateTemplateResult>(HttpMethod.Post, path, query, RequestBody.Json(request), options, cancellationToken);
     }
 
     // ── usage ───────────────────────────────────────────────────────────────────────────────────────────────
