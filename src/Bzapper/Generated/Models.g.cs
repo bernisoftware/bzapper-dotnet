@@ -1308,7 +1308,7 @@ public class ContactImportResult : BzapperObject
 /// <summary><c>ContactImportRow</c> (veja a referência da API).</summary>
 public class ContactImportRow : BzapperObject
 {
-    /// <summary><c>phone</c> — +DDIdigits, or the WhatsApp LID (`&lt;digits&gt;@lid`). Digits without `@lid` are always a phone. Obrigatório.</summary>
+    /// <summary><c>phone</c> — +DDIdigits, the WhatsApp LID (`&lt;digits&gt;@lid`) or the Meta BSUID (`BR.1349…`). Digits without `@lid` are always a phone. Obrigatório.</summary>
     [JsonPropertyName("phone")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Phone { get; set; }
@@ -1317,6 +1317,11 @@ public class ContactImportRow : BzapperObject
     [JsonPropertyName("lid")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Lid { get; set; }
+
+    /// <summary><c>bsuid</c> — Meta business-scoped user ID (`BR.1349…`), official rail. Also accepted in `phone`. With a phone too, it is stored on the phone contact.</summary>
+    [JsonPropertyName("bsuid")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Bsuid { get; set; }
 
     /// <summary><c>name</c></summary>
     [JsonPropertyName("name")]
@@ -1367,7 +1372,7 @@ public class ContactImportRowIssue : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Phone { get; set; }
 
-    /// <summary><c>reason</c> — Errors: phone_required, invalid_phone, invalid_lid, invalid_email, write_failed, taxonomy_failed. Skips: duplicate_phone, suppressed, opted_out, blocked, unreachable, deleted. Obrigatório.</summary>
+    /// <summary><c>reason</c> — Errors: phone_required, invalid_phone, invalid_lid, invalid_bsuid, invalid_email, write_failed, taxonomy_failed. Skips: duplicate_phone, suppressed, opted_out, blocked, unreachable, deleted. Obrigatório.</summary>
     [JsonPropertyName("reason")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Reason { get; set; }
@@ -1507,6 +1512,11 @@ public class ContactRecord : BzapperObject
     [JsonPropertyName("lid")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Lid { get; set; }
+
+    /// <summary><c>bsuid</c> — Meta business-scoped user ID (official rail) — the address of a contact who hides the phone behind a username, or the one Meta sent with the phone.</summary>
+    [JsonPropertyName("bsuid")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Bsuid { get; set; }
 }
 
 /// <summary><c>ContactRecordList</c> (veja a referência da API).</summary>
@@ -1645,7 +1655,7 @@ public class CreateConnectSessionResult : BzapperObject
 /// <summary><c>CreateContact</c> (veja a referência da API).</summary>
 public class CreateContact : BzapperObject
 {
-    /// <summary><c>phone</c> — +DDIdigits (E.164 without spaces), or the WhatsApp LID (`&lt;digits&gt;@lid`). Obrigatório.</summary>
+    /// <summary><c>phone</c> — +DDIdigits (E.164 without spaces), the WhatsApp LID (`&lt;digits&gt;@lid`) or the Meta BSUID (`BR.1349…`). Obrigatório.</summary>
     [JsonPropertyName("phone")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Phone { get; set; }
@@ -1654,6 +1664,11 @@ public class CreateContact : BzapperObject
     [JsonPropertyName("lid")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Lid { get; set; }
+
+    /// <summary><c>bsuid</c> — Meta business-scoped user ID (official rail). With a phone too, it is stored on the phone contact.</summary>
+    [JsonPropertyName("bsuid")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Bsuid { get; set; }
 
     /// <summary><c>name</c></summary>
     [JsonPropertyName("name")]
@@ -4570,7 +4585,7 @@ public class SendBase : BzapperObject
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? Sticky { get; set; }
 
-    /// <summary><c>to</c> — Destination: E.164 phone (+DDIdigits), contact JID (…@s.whatsapp.net), group JID (…@g.us) or the contact's @lid. A @lid is translated to the phone when the connected number knows it; the official rail accepts phone only. Obrigatório.</summary>
+    /// <summary><c>to</c> — Destination: E.164 phone (+DDIdigits), contact JID (…@s.whatsapp.net), group JID (…@g.us) or the contact's @lid. A @lid is translated to the phone when the connected number knows it. Official rail: phone or the Meta BSUID (`BR.1349…`) — a known phone is preferred; authentication templates need a phone (422 official_otp_needs_phone); a BSUID on the unofficial rail is 400 bsuid_official_only. Obrigatório.</summary>
     [JsonPropertyName("to")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? To { get; set; }
