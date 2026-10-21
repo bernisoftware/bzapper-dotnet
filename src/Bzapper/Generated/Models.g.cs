@@ -12,6 +12,62 @@ using Bzapper.Internal;
 
 namespace Bzapper;
 
+/// <summary>An AI app (MCP client) a person authorized to operate this account.</summary>
+public class AIConnection : BzapperObject
+{
+    /// <summary><c>id</c></summary>
+    [JsonPropertyName("id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Id { get; set; }
+
+    /// <summary><c>client_name</c> — Name the AI app registered with, e.g. "Claude".</summary>
+    [JsonPropertyName("client_name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ClientName { get; set; }
+
+    /// <summary><c>user_id</c> — Person who authorized it.</summary>
+    [JsonPropertyName("user_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? UserId { get; set; }
+
+    /// <summary><c>user_name</c></summary>
+    [JsonPropertyName("user_name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? UserName { get; set; }
+
+    /// <summary><c>user_email</c></summary>
+    [JsonPropertyName("user_email")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? UserEmail { get; set; }
+
+    /// <summary><c>user_role</c> — The person's role now (the connection never exceeds it).</summary>
+    [JsonPropertyName("user_role")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? UserRole { get; set; }
+
+    /// <summary><c>project_ids</c> — Projects the connection reaches.</summary>
+    [JsonPropertyName("project_ids")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? ProjectIds { get; set; }
+
+    /// <summary><c>scopes</c> — Permissions granted: bzapper:read (always), bzapper:contacts, bzapper:send, bzapper:campaigns.</summary>
+    [JsonPropertyName("scopes")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Scopes { get; set; }
+
+    /// <summary><c>created_at</c></summary>
+    [JsonPropertyName("created_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? CreatedAt { get; set; }
+
+    /// <summary><c>last_used_at</c> — Absent until the first call.</summary>
+    [JsonPropertyName("last_used_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? LastUsedAt { get; set; }
+}
+
 /// <summary><c>AccountUsage</c> (veja a referência da API).</summary>
 public class AccountUsage : BzapperObject
 {
@@ -2718,6 +2774,81 @@ public class InstanceList : BzapperObject
     public List<Instance>? Data { get; set; }
 }
 
+/// <summary><c>InstanceUptime</c> (veja a referência da API).</summary>
+public class InstanceUptime : BzapperObject
+{
+    /// <summary><c>instance_id</c></summary>
+    [JsonPropertyName("instance_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? InstanceId { get; set; }
+
+    /// <summary><c>status</c> — Current status.</summary>
+    [JsonPropertyName("status")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Status { get; set; }
+
+    /// <summary><c>since</c> — Since when the number is in its current status.</summary>
+    [JsonPropertyName("since")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? Since { get; set; }
+
+    /// <summary><c>tracked_since</c> — First recorded status change.</summary>
+    [JsonPropertyName("tracked_since")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? TrackedSince { get; set; }
+
+    /// <summary><c>windows</c> — Percent of time connected (0–100, one decimal). Null when the history does not cover the window yet.</summary>
+    [JsonPropertyName("windows")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public InstanceUptimeWindows? Windows { get; set; }
+
+    /// <summary><c>events</c> — Latest status changes, newest first (up to 20).</summary>
+    [JsonPropertyName("events")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<InstanceUptimeEventsItem>? Events { get; set; }
+}
+
+/// <summary><c>InstanceUptimeEventsItem</c> (veja a referência da API).</summary>
+public class InstanceUptimeEventsItem : BzapperObject
+{
+    /// <summary><c>status</c></summary>
+    [JsonPropertyName("status")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Status { get; set; }
+
+    /// <summary><c>reason</c></summary>
+    [JsonPropertyName("reason")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Reason { get; set; }
+
+    /// <summary><c>at</c></summary>
+    [JsonPropertyName("at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
+    public DateTimeOffset? At { get; set; }
+}
+
+/// <summary>Percent of time connected (0–100, one decimal). Null when the history does not cover the window yet.</summary>
+public class InstanceUptimeWindows : BzapperObject
+{
+    /// <summary><c>24h</c></summary>
+    [JsonPropertyName("24h")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? Last24h { get; set; }
+
+    /// <summary><c>7d</c></summary>
+    [JsonPropertyName("7d")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? Last7d { get; set; }
+
+    /// <summary><c>30d</c></summary>
+    [JsonPropertyName("30d")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? Last30d { get; set; }
+}
+
 /// <summary><c>InviteUserRequest</c> (veja a referência da API).</summary>
 public class InviteUserRequest : BzapperObject
 {
@@ -3023,6 +3154,15 @@ public class LibraryTemplate : BzapperObject
     [JsonPropertyName("buttons")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<JsonElement>? Buttons { get; set; }
+}
+
+/// <summary><c>ListAIConnectionsResult</c> (veja a referência da API).</summary>
+public class ListAIConnectionsResult : BzapperObject
+{
+    /// <summary><c>data</c></summary>
+    [JsonPropertyName("data")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<AIConnection>? Data { get; set; }
 }
 
 /// <summary><c>ListAvailableOfficialNumbersResult</c> (veja a referência da API).</summary>

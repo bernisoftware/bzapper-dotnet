@@ -182,7 +182,9 @@ def build_pending():
         for wire, ps in props.items():
             if wire in base_wires:
                 continue  # já declarada na classe base (allOf)
-            cs = pascal(wire)
+            # Campo que começa com dígito (`24h`, `7d`, `30d` das janelas de uptime) não é
+            # identificador em C#: vira `Last24h` (a serialização segue pelo JsonPropertyName).
+            cs = "Last" + pascal(wire)[1:] if wire[:1].isdigit() else pascal(wire)
             if cs in used:
                 cs = cs + "Value"
             used.add(cs)

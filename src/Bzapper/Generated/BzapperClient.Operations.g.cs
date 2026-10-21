@@ -776,6 +776,35 @@ public sealed partial class BzapperClient
         return Http.SendVoidAsync(HttpMethod.Post, path, null, null, options, cancellationToken);
     }
 
+    // ── ai ──────────────────────────────────────────────────────────────────────────────────────────────────
+
+    /// <summary>AI apps connected to this account (MCP connector) — <c>GET /ai-connections</c>.</summary>
+    /// <remarks>Active connections of the AI connector. An admin sees every connection of the account; an agent sees only their own. An API key without a person behind it sees them only if it is an admin key.</remarks>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="ListAIConnectionsResult"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<ListAIConnectionsResult> ListAIConnectionsAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/ai-connections";
+        return Http.SendAsync<ListAIConnectionsResult>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Revoke an AI app's access. Its tokens stop working on the next call. — <c>DELETE /ai-connections/{id}</c>.</summary>
+    /// <remarks>An admin can revoke any connection of the account; an agent, only their own.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Connection ID.</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>Nada (a API responde sem corpo).</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task RevokeAIConnectionAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/ai-connections/" + PathSegment.Encode(id, "id");
+        return Http.SendVoidAsync(HttpMethod.Delete, path, null, null, options, cancellationToken);
+    }
+
     // ── billing ─────────────────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>Cancel Pro at the end of the current cycle — <c>POST /me/plan/cancel</c>.</summary>
@@ -1977,6 +2006,20 @@ public sealed partial class BzapperClient
     {
         var path = "/instances/" + PathSegment.Encode(id, "id");
         return Http.SendAsync<Instance>(HttpMethod.Get, path, null, null, options, cancellationToken);
+    }
+
+    /// <summary>Number availability — share of time connected in 24h, 7d and 30d, and the latest status changes — <c>GET /instances/{id}/uptime</c>.</summary>
+    /// <remarks>Every status change of a number is recorded. This returns the share of time it was connected (warming counts as connected) over the last 24 hours, 7 days and 30 days, since when it is in its current status, and the 20 latest transitions. History starts when it began to be recorded: a window that goes back further shrinks to `tracked_since` instead of counting the unrecorded time as offline.</remarks>
+    /// <param name="id"><c>id</c> (caminho). Obrigatório. Instance ID (UUID).</param>
+    /// <param name="options">Opções desta chamada (Idempotency-Key própria, tempo limite, projeto).</param>
+    /// <param name="cancellationToken">Cancelamento.</param>
+    /// <returns>O objeto <see cref="InstanceUptime"/> devolvido pela API.</returns>
+    /// <exception cref="BzapperException">Erro da API ou de rede (use <see cref="BzapperException.Code"/>).</exception>
+    /// <exception cref="ArgumentException">Parâmetro de caminho vazio, <c>.</c> ou <c>..</c> (antes de qualquer requisição).</exception>
+    public Task<InstanceUptime> GetInstanceUptimeAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var path = "/instances/" + PathSegment.Encode(id, "id") + "/uptime";
+        return Http.SendAsync<InstanceUptime>(HttpMethod.Get, path, null, null, options, cancellationToken);
     }
 
     /// <summary>List the tenant's instances (numbers) — <c>GET /instances</c>.</summary>

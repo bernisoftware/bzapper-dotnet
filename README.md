@@ -7,7 +7,7 @@ Connect** — com novas tentativas idempotentes, erros tipados e modelos tipados
 (e só no `netstandard2.0`).
 
 ```bash
-dotnet add package Bzapper --version 0.15.2
+dotnet add package Bzapper --version 0.16.0
 ```
 
 ```csharp
@@ -190,6 +190,7 @@ var conn = await bz.ConnectInstanceAsync(inst.Id!, method: "qr");   // ou "pair_
 Console.WriteLine(conn.QrCode ?? conn.PairCode);                    // mostre ao usuário e aguarde "connected"
 
 var now = await bz.GetInstanceAsync(inst.Id!);                      // Status: qr_pending → connected
+var up = await bz.GetInstanceUptimeAsync(inst.Id!);                // up.Windows.Last24h / Last7d / Last30d (null = sem histórico ainda)
 await bz.SetInboundFiltersAsync(inst.Id!, new InboundFilters { IgnoreGroups = true });
 await bz.DisconnectInstanceAsync(inst.Id!);
 ```
@@ -406,7 +407,7 @@ await bz.SendTextAsync(
 Cada release declara se muda a superfície pública. Fixe a versão exata e atualize de propósito:
 
 ```xml
-<PackageReference Include="Bzapper" Version="[0.15.2]" />
+<PackageReference Include="Bzapper" Version="[0.16.0]" />
 ```
 
 ## Desenvolvimento

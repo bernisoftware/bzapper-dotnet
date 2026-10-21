@@ -174,7 +174,7 @@ public class ConformanceTests
     {
         var missing = Conformance.Ops.Where(op => !OpTable.Ops.ContainsKey(op)).OrderBy(op => op).ToList();
         Assert.True(missing.Count == 0, "ops sem método na SDK .NET: " + string.Join(", ", missing));
-        Assert.Equal(202, Conformance.Ops.Count);
+        Assert.Equal(205, Conformance.Ops.Count);
     }
 
     [Fact]
